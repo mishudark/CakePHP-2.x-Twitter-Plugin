@@ -45,7 +45,7 @@
 		
 		/*
 		 * Set the counsumer key and consumer secret for the app. Method should be called at startup and
-		 * before twitterConnect(). All data will be saved in a cookie. 
+		 * before connect(). All data will be saved in a cookie. 
 		 * 
 		 * @access public
 		 * @param string $consumer_key OAuth consumer key of the Twitter app
@@ -239,6 +239,44 @@
 		
 		#====================Twitter API methods
 		
+		/*
+		 * Make a custom request on the Twitter API
+		 * 
+		 * @access public
+		 * @return JSON or XML
+		 * @param string $method The request method (post, delete, get, put)
+		 * @param string $twitterMethodUrl The url of the API method (without 'api.twitter.com'), 
+		 * e.g. /1/trends.json
+		 * @param array() $body The body of the api request. It has to be an valid array()
+		 */
+		public function apiRequest($method, $twitterMethodUrl, $body) {
+			$request = array();
+			
+			//Method 
+			$method = strtoupper($method);
+			if($method == 'GET' || $method == 'POST' || $method == 'DELETE' || $method == 'PUT') $request['method'] = $method;
+			//URI
+			if(substr($twitterMethodUrl, 0, 1) == '/') $twitterMethodUrl = substr($twitterMethodUrl, 1, strlen($twitterMethodUrl));
+			$request['uri'] = array(
+				'host' => 'api.twitter.com',
+				'path' => $twitterMethodUrl
+			);
+			//Auth
+			$request['auth'] = $this->authArray();
+			//Body
+			if(is_array($body)) {
+				$body = array_change_key_case($body);
+				//Check if status isset
+				if(array_key_exists('status', $body)) {
+					if(strlen($body['status']) > 140) $body['status'] = substr($body['status'], 0, 137).'...';
+				}
+				//Set the request body
+				$request['body'] = $body;
+			}
+			//Return
+			return $this->Oauth->request($request);
+		}
+		
 		#Account Methods
 		
 		#account/verify_credentials
@@ -252,17 +290,8 @@
 		 * @return array 
 		 */
 		public function accountVerifyCredentials() {
-			//Request 	
-			$request = array(
-	        	'method' => 'GET',
-	        	'uri' => array(
-	          		'host' => 'api.twitter.com',
-	          		'path' => 'account/verify_credentials.json',
-	        	),
-	        	'auth' => $this->authArray(),
-	      	);
-			//Return
-			return json_decode($this->Oauth->request($request), true);
+			//Request & return
+			return json_decode($this->apiRequest('get', '/1/account/verify_credentials.json', ''), true);
 		}
 		
 		#account/rate_limit_status
@@ -277,19 +306,9 @@
 		 * @return array() 
 		 */
 		public function accountRateLimitStatus() {
-			//Request
-			$requst = array(
-				'method' => 'GET',
-				'uri' => array(
-					'host' => 'api.twitter.com',
-					'path' => 'account/rate_limit_status.json'
-				),
-	        	'auth' => $this->authArray(),
-			);
-			//Return
-			return json_decode($this->Oauth->request($requst), true);
+			//Request & return
+			return json_decode($this->apiRequest('get', '/1/account/rate_limit_status.json', ''), true);
 		}
-		
 		
 		#Timeline Methods
 		
@@ -303,18 +322,11 @@
 		 * @return array()  
 		 */
 		public function publicTimeline() {
-			//Request
-			$request = array(
-				'method' => 'GET',
-				'uri' => array(
-					'host' => 'api.twitter.com',
-					'paht' => 'statuses/public_timeline.json'
-				),
-				'auth' => $this->authArray()
-			);
-			//Return
-			return json_decode($this->Oauth->request($request), true);	
+			//Request & Return
+			return json_decode($this->apiRequest('get', '/1/statuses/public_timeline.json', ''), true);	
 		}
 		//-----
+		
+		
 	 }
 ?>
