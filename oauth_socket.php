@@ -1,6 +1,30 @@
 <?php
 App::import('Core', 'HttpSocket');
 
+/**
+ * Extension to CakePHP core HttpSocket class that overrides the request method
+ * and intercepts requests whose $request['auth']['method'] param is 'OAuth'.
+ *
+ * The correct OAuth Authorization header is determined from the request params
+ * and then set in the $request['header']['Authorization'] param of the request
+ * array before passing it back to HttpSocket::request() to send the request and
+ * parse the response.
+ *
+ * So to trigger OAuth, add $request['auth']['method'] = 'OAuth' to your
+ * request. In addition, you'll need to add your consumer key in the
+ * $request['auth']['oauth_consumer_key'] and your consumer secret in the
+ * $request['auth']['oauth_consumer_secret'] param. These are given to you by
+ * the OAuth provider. And once you have them, $request['auth']['oauth_token']
+ * and $request['auth']['oauth_token_secret'] params. Your OAuth provider may
+ * require you to send additional params too. Include them in the
+ * $request['auth'] array and they'll be passed on in the Authorization header
+ * and considered when signing the request.
+ *
+ * @author Neil Crookes <neil@neilcrookes.com>
+ * @link http://www.neilcrookes.com
+ * @copyright (c) 2010 Neil Crookes
+ * @license MIT License - http://www.opensource.org/licenses/mit-license.php
+ */
 class OAuthSocket extends HttpSocket {
   /**
    * Default OAuth parameters. These get merged into the $request['auth'] param.

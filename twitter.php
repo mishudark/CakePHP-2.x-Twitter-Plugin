@@ -28,17 +28,18 @@
 		 * The Twitter consumer key & consumer secret
 		 * 
 		 * @access public
-		 * @var
+		 * @var string $consumer_key The OAuth consumer key
+		 * @var string $consumer_secret The OAuth consumer secret
 		 */ 
 		var $consumer_key, $consumer_secret;
 		
-		//----OAuth setup and connect
+		//============OAuth setup and connect
 		
 		/*
 		 * The OAuthConfig Class and class var
 		 * 
 		 * @access private
-		 * 
+		 * @var private $Oauth The OAuthSocket class var
 		 */
 		private $Oauth;
 		
@@ -47,8 +48,9 @@
 		 * before twitterConnect(). All data will be saved in a cookie. 
 		 * 
 		 * @access public
-		 * @params $consumer_key: The consumer key for the twitter app, $consumer_secret: The consumer 
-		 * secret for the twitter app, $cookie: TRUE OR FALSE
+		 * @param string $consumer_key OAuth consumer key of the Twitter app
+		 * @param string $consumer_secret OAuth consumer secret of Twitter app
+		 * @param bool $cookie (TRUE or FALSE) Save the keys as cookie (true) or not (false) 
 		 */		
 		 public function setup($consumer_key, $consumer_secret, $cookie) {
 		 	$this->consumer_key = $consumer_key;
@@ -76,8 +78,8 @@
 		 /*
 		  * Connect app to twitter and let it authorize.
 		  * 
-		  * @param $callback: The callback url (This should be a function in the controller where 
-		  * callback() is called)
+		  * @param string $callback Url where Twitter should redirect after authorisation 
+		  * (Should be a function in the controller weher $this->Twitter->callback() is called)
 		  * @access public  
 		  */
 		 public function connect($callback) {
@@ -101,10 +103,11 @@
 		}
 					  
 		/*
-		 * OAuthToken and OAuthVertifier
+		 * OAuth token and OAuth token secret
 		 * 
 		 * @access public 
-		 * @var
+		 * @var string $oauth_token The user-specific OAuth token
+		 * @var string $oauth_token_secret The user-specific OAuth token secret
 		 */
 		var $oauth_token, $oauth_token_secret;
 		
@@ -112,8 +115,8 @@
 		 * The twitter callback method. Should be called after connect() in a different controller function.
 		 * 
 		 * @access public
-		 * @params $oauth_token: The token send back by Twitter to the callback url,
-		 * $$oauth_vertifier: The vertifier send back by Twitter to the callback url
+		 * @param string $oauth_token The token send back by Twitter to the callback url,
+		 * @param string $$oauth_vertifier: The vertifier send back by Twitter to the callback url
 		 */
 		public function callback($oauth_token, $oauth_vertifier) {
 			//Build request
@@ -141,7 +144,8 @@
 		 * Set the oauth secret and oauth vertifier and save the in the current session
 		 * 
 		 * @access public
-		 * @params $oauth_secret: The oauth secret, $oauth_vertifier: The oauth vertifier
+		 * @param string $oauth_secret The oauth secret 
+		 * @param string $oauth_vertifier The oauth vertifier
 		 */
 		function setOauthUserKeys($oauth_token, $oauth_token_secret) {
 			$current_session = $this->Session->read('Twitter.OAuth.User');
@@ -186,7 +190,6 @@
 		/*
 		 * Initialized before the controllers beforeFilter()
 		 */
-		 
 		function initialize(&$controller, $settings = array()) {
 			//Open a new OAuthSocket
 		 	$this->Oauth = new OAuthSocket();
@@ -222,6 +225,7 @@
 		 * Return the auth array for the Twitter API methods
 		 * 
 		 * @access private
+		 * @return array()
 		 */
 		private function authArray() {
 			return array(
