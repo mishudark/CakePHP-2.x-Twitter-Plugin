@@ -253,12 +253,9 @@
 	        	'method' => 'GET',
 	        	'uri' => array(
 	          		'host' => 'api.twitter.com',
-	          		'path' => '/account/verify_credentials.json',
+	          		'path' => 'account/verify_credentials.json',
 	        	),
 	        	'auth' => $this->authArray(),
-	        	/*'body' => array(
-	          		'status' => 'Hello world!',
-	        	),*/
 	      	);
 			//Return
 			return json_decode($this->Oauth->request($request), true);
@@ -279,14 +276,41 @@
 			//Request
 			$requst = array(
 				'method' => 'GET',
-				'url' => array(
+				'uri' => array(
 					'host' => 'api.twitter.com',
-					'path' => '/account/rate_limit_status.json'
+					'path' => 'account/rate_limit_status.json'
 				),
-	        	'auth' => $this->authArray($this->consumer_key, $this->consumer_secret, $this->oauth_token, $this->oauth_token_secret),
+	        	'auth' => $this->authArray(),
 			);
+			//Return
+			return json_decode($this->Oauth->request($requst), true);
 		}
 		
+		
+		#Timeline Methods
+		
+		#statuses/public_timeline.json
+		/*
+		 * Returns the 20 most recent statuses from non-protected users 
+		 * who have set a custom user icon. The public timeline is cached for 60 seconds 
+		 * so requesting it more often than that is a waste of resources.
+		 * 
+		 * @access public
+		 * @return array()  
+		 */
+		public function publicTimeline() {
+			//Request
+			$request = array(
+				'method' => 'GET',
+				'uri' => array(
+					'host' => 'api.twitter.com',
+					'paht' => 'statuses/public_timeline.json'
+				),
+				'auth' => $this->authArray()
+			);
+			//Return
+			return json_decode($this->Oauth->request($request), true);	
+		}
 		//-----
 	 }
 ?>
