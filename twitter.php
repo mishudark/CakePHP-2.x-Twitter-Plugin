@@ -27,11 +27,11 @@
 		/*
 		 * The Twitter consumer key & consumer secret
 		 * 
-		 * @access public
+		 * @access private
 		 * @var string $consumer_key The OAuth consumer key
 		 * @var string $consumer_secret The OAuth consumer secret
 		 */ 
-		var $consumer_key, $consumer_secret;
+		private $consumer_key, $consumer_secret;
 		
 		//============OAuth setup and connect
 		
@@ -76,6 +76,33 @@
 		 }
 		 
 		 /*
+		  * Change the local consumer key and consumer secret after the setup() and manuell
+		  * 
+		  * @access public
+		  * @param string $consumer_key The consumer key for your Twitter app
+		  * @param string $consumer_secret The consumer secret for your Twitter app
+		  * @param bool $cookie TRUE: The keys are stored in a local CakeCookie 
+		  * FALSE: The keys are just stored in a local session and not in a CakeCookie
+		  */
+		 public function setOauthConsumerKeys($consumer_key, $consumer_secret, $cookie) {
+		 	//Update / set the local class vars
+		 	$this->consumer_key = $consumer_key;
+			$this->consumer_secret = $consumer_secret;
+			//Content for session and cookie
+			$content = array(
+				'consumer_key' => $this->consumer_key,
+				'consumer_secret' => $this->consumer_secret				
+			);
+			//Check if cookie is allowed
+			if($cookie == true) {
+				if(!is_null($this->Cookie->read('Twitter.OAuth.Consumer'))) $this->Cookie->delete('Twitter.OAuth.Consumer');
+				$this->Cookie->write('Twitter.OAuth.Consumer', $content, true, '+365 day'); 
+			}
+			//Setup local session
+			$this->Session->write('Twitter.OAuth.Consumer', $content);
+		 }
+		 
+		 /*
 		  * Connect app to twitter and let it authorize.
 		  * 
 		  * @param string $callback Url where Twitter should redirect after authorisation 
@@ -105,11 +132,11 @@
 		/*
 		 * OAuth token and OAuth token secret
 		 * 
-		 * @access public 
+		 * @access private 
 		 * @var string $oauth_token The user-specific OAuth token
 		 * @var string $oauth_token_secret The user-specific OAuth token secret
 		 */
-		var $oauth_token, $oauth_token_secret;
+		private $oauth_token, $oauth_token_secret;
 		
 		/*
 		 * The twitter callback method. Should be called after connect() in a different controller function.
@@ -137,6 +164,7 @@
 			//Get the response 
 		  	$response = $this->Oauth->request($request);
 		  	parse_str($response, $response);
+			//print_r($response);
 			$this->setOauthUserKeys($response['oauth_token'], $response['oauth_token_secret']);
 		}
 		
@@ -185,10 +213,8 @@
 			return $user_keys;
 		}
 		
-		//Controller before setup 
-		 
 		/*
-		 * Initialized before the controllers beforeFilter()
+		 * Controller before setup - Initialized before the controllers beforeFilter()
 		 */
 		function initialize(&$controller, $settings = array()) {
 			//Open a new OAuthSocket
@@ -204,7 +230,8 @@
 				else {
 					$consumer_session = $this->Session->read('Twiter.OAuth.Consumer');
 					if(!is_null($consumer_session)) {
-						
+						$this->oauth_token = $consumer_session['oauth_token'];
+						$this->oauth_token_secret = $consumer_session['oauth_token_secret'];
 					}
 				}	
 			}
@@ -309,6 +336,37 @@
 			//Request & return
 			return json_decode($this->apiRequest('get', '/1/account/rate_limit_status.json', ''), true);
 		}
+		
+		#Direct Messages Methods
+		//NOTE: To use this methods your app needs 'Read, Write, and Direct messages'-Access
+		
+		#direct_messages
+		/*
+		 * Returns a list of the 20 most recent direct messages sent to the authenticating user. 
+		 * The XML and JSON versions include detailed information about the sending and recipient users. 
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param int $count The count how many messages should be shown (max. 200)
+		 * @param int $page Specifies the page of direct messages to retrieve
+		 */
+		public function getDirectMessages($count = null, $page = null) {
+			if($count == '' || $count == null || $count == 0) {
+				$count = 20;
+			}
+			else if($count > 200) {
+				$count = 200;
+			}
+			//Body
+			$body = array();
+			$body['count'] = $count;
+			if($page > 0) $body['page'] = $page;
+			//Request
+			return json_decode($this->apiRequest('get', '/1/direct_messages.json', $body), true);
+		}
+		
+		
+		#Status Methods
 		
 		#Timeline Methods
 		
