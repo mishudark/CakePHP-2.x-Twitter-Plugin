@@ -408,6 +408,39 @@
 			return json_decode($this->apiRequest('delete', '/1/direct_messages/destroy/'.$id.'.json', ''), true);
 		}
 		
+		#Friends and Follower Methods
+		
+		#friends/ids
+		/*
+		 * Returns all ids of the friends form any user
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param string $screen_name The username 
+		 */
+		public function getFriendsIds($screen_name) {
+			//Request-body
+			$body = array();
+			$body['screen_name'] = strtolower($screen_name);
+			//Return and request
+			return json_decode($this->apiRequest('get', '/1/friends/ids.json', $body), true);
+		}
+
+		#followers/ids
+		/*
+		 * Returns all ids of the followers from any user
+		 * 
+		 * @access public 
+		 * @return array()
+		 * @param string $screen_name The usernam
+		 */
+		public function getFollowersIds($screen_name) {
+			//Request-body
+			$body = array();
+			$body['screen_name'] = strtolower($screen_name);
+			//Return and request
+			return json_decode($this->apiRequest('get', '/1/followers/ids.json', $body), true);	
+		}
 		#Status Methods
 		
 		#Timeline Methods
