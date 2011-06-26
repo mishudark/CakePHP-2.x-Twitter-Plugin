@@ -297,6 +297,9 @@
 				if(array_key_exists('status', $body)) {
 					if(strlen($body['status']) > 140) $body['status'] = substr($body['status'], 0, 137).'...';
 				}
+				else if(array_key_exists('text', $body)) {
+					if(strlen($body['text']) > 140) $body['text'] = substr($body['text'], 0, 137).'...';
+				}
 				//Set the request body
 				$request['body'] = $body;
 			}
@@ -350,21 +353,52 @@
 		 * @param int $count The count how many messages should be shown (max. 200)
 		 * @param int $page Specifies the page of direct messages to retrieve
 		 */
-		public function getDirectMessages($count = null, $page = null) {
-			if($count == '' || $count == null || $count == 0) {
-				$count = 20;
-			}
-			else if($count > 200) {
-				$count = 200;
-			}
-			//Body
-			$body = array();
-			$body['count'] = $count;
-			if($page > 0) $body['page'] = $page;
-			//Request
-			return json_decode($this->apiRequest('get', '/1/direct_messages.json', $body), true);
+		public function getDirectMessages() {
+			//Return 
+			return json_decode($this->apiRequest('get', '/1/direct_messages.json', ''), true);
 		}
 		
+		#direct_messages/sent
+		/*
+		 * Returns a list of the 20 most recent direct messages sent by the authenticating user. 
+		 * The XML and JSON versions include detailed information about the sending and recipient users.
+		 * 
+		 * @access public
+		 * @return array() 
+		 */
+		public function directMessagesSent() {
+			//Return 
+			return json_decode($this->apiRequest('get','/1/direct_messages/sent.json', ''), true);
+		}
+		
+		#direct_messages/new
+		/*
+		 * Sends a new direct message to the specified user from the authenticating user. 
+		 * Requires both the user and text parameters. Request must be a POST. 
+		 * Returns the sent message in the requested format when successful.
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param string $screen_name The username of the recipient 
+		 * (Must be a follower of the authenticating user)
+		 * @param text $text The message text. Shouldn't be longer than 140 chars
+		 */
+		public function newDirectMessage($screen_name, $text) {
+			//Request body
+			$body = array();
+			if($screen_name != '' && $text != '') {
+				$body['screen_name'] = strtolower($screen_name);
+				$body['text'] = $text;
+			}
+			//Return and request
+			return json_decode($this->apiRequest('post', '/1/direct_messages/new.json', $body), true);
+		}
+		
+		#direct_messages/destroy
+		public function destroyDirectMessage($id) {
+			//Return 
+			return json_decode($this->apiRequest('delete', '/1/direct_messages/destroy/'.$id.'.json', ''), true);
+		}
 		
 		#Status Methods
 		
