@@ -395,6 +395,14 @@
 		}
 		
 		#direct_messages/destroy
+		/*
+		 * Destroys the direct message specified in the required ID parameter. 
+		 * The authenticating user must be the recipient of the specified direct message.
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param int $id An unique identifier number of the message.
+		 */
 		public function destroyDirectMessage($id) {
 			//Return 
 			return json_decode($this->apiRequest('delete', '/1/direct_messages/destroy/'.$id.'.json', ''), true);
