@@ -366,7 +366,7 @@
 		 * @access public
 		 * @return array() 
 		 */
-		public function directMessagesSent() {
+		public function getDirectMessagesSent() {
 			//Return 
 			return json_decode($this->apiRequest('get','/1/direct_messages/sent.json', ''), true);
 		}
@@ -408,6 +408,7 @@
 			return json_decode($this->apiRequest('delete', '/1/direct_messages/destroy/'.$id.'.json', ''), true);
 		}
 		
+		
 		#Friends and Follower Methods
 		
 		#friends/ids
@@ -441,6 +442,97 @@
 			//Return and request
 			return json_decode($this->apiRequest('get', '/1/followers/ids.json', $body), true);	
 		}
+		
+		
+		#Friendship Methods
+		
+		#friendships/create
+		/*
+		 * Allows the authenticating users to follow the user specified in the ID parameter. 
+		 * Returns the befriended user in the requested format when successful. 
+		 * Returns a string describing the failure condition when unsuccessful. 
+		 * If you are already friends with the user an HTTP 403 will be returned.
+		 * 
+		 * @access public 
+		 * @return array()
+		 * @param string $screen_name The uername of the user to be followed 
+		 */
+		public function createFriendship($screen_name) {
+			//Check if $screen_name is string or int (ID)
+			if(!is_numeric($screen_name)) { 
+				//Request-body
+				$body = array();
+				$body['screen_name'] = strtolower($screen_name);
+				//Return and request
+				return json_decode($this->apiRequest('post', '/1/friendships/create.json', $body), true);
+			}
+		}
+		/*
+		 * Look at createFriendship()
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param int $id The unique identifier of the user
+		 */
+		public function createFriendshipById($id) {
+			if(is_numeric($id)) {
+				//Request-body
+				$body = array();
+				$body['user_id'] = $id;
+				//Return and request
+				return json_decode($this->apiRequest('post', '/1/friendships/create.json', $body), true);
+			}
+		}
+		
+		#friendships/destroy
+		/*
+		 * Allows the authenticating users to unfollow the user specified in the ID parameter. 
+		 * Returns the unfollowed user in the requested format when successful. 
+		 * Returns a string describing the failure condition when unsuccessful.
+		 * 
+		 * @access public
+		 * @retun array()
+		 * @param string $screen_name The username of the user to unfollow
+		 */
+		public function destroyFriendship($screen_name) {
+			//Request-body
+			if(!is_numeric($screen_name)) {
+				$body = array();
+				$body['screen_name'] = strtolower($screen_name);
+				//Return and request
+				return json_decode($this->apiRequest('post', '/1/friendships/destroy.json', $body), true);	
+			}	
+		}
+		/*
+		 * Look at destoryFriendship()
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param int $id The unique identifier of the user to unfollow
+		 */
+		public function destroyFriendshipById($id) {
+			if(is_numeric($id)) {
+				$body = array();
+				$body['user_id'] = $id;
+				//Return and request
+				return json_decode($this->apiRequest('post', '/1/friendships/destroy.json', $body), true);
+			}
+		}
+		
+		#friendships/exists
+		/*
+		 * Tests for the existance of friendship between two users. 
+		 * Will return true if user_a follows user_b, otherwise will return false.
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param string $user_a Screen name of user a
+		 * @param string $user_b Screen name of user b
+		 */
+		public function friendshipExists($user_a, $user_b) {
+			
+		}
+		
 		#Status Methods
 		
 		#Timeline Methods
