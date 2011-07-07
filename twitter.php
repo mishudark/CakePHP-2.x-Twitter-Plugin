@@ -530,10 +530,69 @@
 		 * @param string $user_b Screen name of user b
 		 */
 		public function friendshipExists($user_a, $user_b) {
-			
+			//Request-body
+			$body = array();
+			$body['user_a'] = $user_a;
+			$body['user_b'] = $user_b;
+			//Return and request 
+			return json_decode($this->apiRequest('get', '/1/friendships/exists.json', $body), true);	
 		}
 		
 		#Status Methods
+		
+		#statuses/show
+		/*
+		 *Returns a single status, specified by the id parameter below. 
+		 * The status's author will be returned inline.
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param int $id The id of the tweet
+		 */
+		public function showStatus($id) {
+			if(is_numeric($id)) {
+				//Return and request
+				return json_decode($this->apiRequest('get', '/1/statuses/show/'.$id.'.json', ''), true);
+			}
+		}
+		
+		#statuses/update
+		/*
+		 * Updates the authenticating user's status. 
+		 * Requires the status parameter specified below. Request must be a POST. 
+		 * A status update with text identical to the authenticating user's current 
+		 * status will be ignored to prevent duplicates.
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param string $status The text wich should be posted as new status 
+		 */ 	
+		public function updateStatus($status) {
+			if($status != null || $status != '') {
+				//Request-body
+				$body = array(
+					'status' => $status
+				);
+				//Return and request
+				return json_decode($this->apiRequest('post', '/1/statuses/update.json', $body), true);
+			}
+		}
+		
+		#statuses/destroy
+		/*
+		 * Destroys the status specified by the required ID parameter. 
+		 * The authenticating user must be the author of the specified status.
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param int $id The ID of the status wich should be destroyed 
+		 */ 
+		public function destroyStatus($id) {
+			if(is_numeric($id)) {
+				//Return and request
+				return json_decode($this->apiRequest('post', '/1/statuses/destroy/'.$id.'.json', ''), true);
+			}
+		}
 		
 		#Timeline Methods
 		
