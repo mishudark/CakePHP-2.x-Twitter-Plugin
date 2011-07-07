@@ -594,6 +594,7 @@
 			}
 		}
 		
+		
 		#Timeline Methods
 		
 		#statuses/public_timeline
@@ -670,6 +671,28 @@
 		public function mentionsTimeline() {
 			//Return and request
 			return json_decode($this->apiRequest('get', '/1/statuses/mentions.json', ''), true);
+		}
+		
+		
+		#User Methods
+		
+		#users/show
+		/*
+		 * Returns extended information of a given user, specified by ID or screen name 
+		 * as per the required id parameter. The author's most recent status will be returned inline.
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param int || string $param The ID or screen name of the user 
+		 */
+		public function showUser($param) {
+			//Request-body
+			$body = array();
+			//Check if $param is numeric
+			if(is_numeric($param)) $body['user_id'] = $param;
+			else $body['screen_name'] = strtolower($param);
+			//Return and request
+			return json_decode($this->apiRequest('get', '/1/users/show.json', $body), true);
 		}
 		//-----
 	 }
