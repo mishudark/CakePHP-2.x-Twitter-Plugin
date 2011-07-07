@@ -596,7 +596,7 @@
 		
 		#Timeline Methods
 		
-		#statuses/public_timeline.json
+		#statuses/public_timeline
 		/*
 		 * Returns the 20 most recent statuses from non-protected users 
 		 * who have set a custom user icon. The public timeline is cached for 60 seconds 
@@ -609,8 +609,68 @@
 			//Request & Return
 			return json_decode($this->apiRequest('get', '/1/statuses/public_timeline.json', ''), true);	
 		}
+		
+		#statuses/friends_timeline
+		/*
+		 * Returns the 20 most recent statuses posted by the authenticating user and that user's friends. 
+		 * This is the equivalent of /timeline/home on the Web.
+		 * 
+		 * @access public
+		 * @return array() 
+		 */
+		public function friendsTimeline() {
+			//Return and request
+			return json_decode($this->apiRequest('get', '/1/statuses/friends_timeline.json', ''), true);
+		}
+		
+		#statuses/home_timeline
+		/*
+		 * Returns the 20 most recent statuses, including retweets, posted by the authenticating 
+		 * user and that user's friends. This is the equivalent of /timeline/home on the Web.
+		 * 
+		 * @access public
+		 * @return array() 
+		 */
+		public function homeTimeline() {
+			//Return and request
+			return json_decode($this->apiRequest('get', '/1/statuses/home_timeline.json', ''), true);
+		}
+		
+		#statuses/user_timeline
+		/*
+		 * Returns the 20 most recent statuses posted from the authenticating user. 
+		 * It's also possible to request another user's timeline via the id parameter. 
+		 * This is the equivalent of the Web / page for your own user, 
+		 * or the profile page for a third party.
+		 * 
+		 * @access public
+		 * @return array()
+		 * @param int || string $param The ID or screen name of the user 
+		 */
+		public function userTimeline($param = null) {
+			//Request-body
+			$body = array();
+			//Check if $param is numeric
+			if(is_numeric($param)) $body['user_id'] = $param;			
+			else if(!is_numeric($param)) $body['screen_name'] = strtolower($param);
+			//Return homeTimeline if $param is null
+			else if($param == '' || $param == null)	return $this->homeTimeline();
+			//Return and request
+			return json_decode($this->apiRequest('get', '/1/statuses/user_timeline.json', $body), true);
+		}
+		
+		#statuses/mentions
+		/*
+		 * Returns the 20 most recent mentions (status containing @username) 
+		 * for the authenticating user.
+		 * 
+		 * @access public
+		 * @return array() 
+		 */
+		public function mentionsTimeline() {
+			//Return and request
+			return json_decode($this->apiRequest('get', '/1/statuses/mentions.json', ''), true);
+		}
 		//-----
-		
-		
 	 }
 ?>
