@@ -9,6 +9,10 @@ Before you start visit https://dev.twitter.com/apps/new and register your own ap
 OAuthConsumer and OAuthConsumerSecret. Then you are able to start and connect your CakePHP-App
 with twitter.
 
+Installation and setup:
+https://github.com/fnitschmann/CakePHP-TwitterComponent/wiki/Installation-and-Setup
+
+
 @author Florian Nitschmann (f.nitschmann@media-n.net)
 @links www.florian-nitschmann.de / www.media-n.net
 @copyright (c) 2011 Florian Nitschman/media-n
