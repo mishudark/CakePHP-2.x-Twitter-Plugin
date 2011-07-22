@@ -16,7 +16,6 @@
 	 * @copyright (c) 2011 Florian Nitschman/media-n
 	 * @license MIT License - http://www.opensource.org/licenses/mit-license.php
 	 */
-
 	 require_once 'oauth_socket.php';
 	 
 	 class TwitterComponent extends Object {
@@ -52,7 +51,7 @@
 		 * @param string $consumer_secret OAuth consumer secret of Twitter app
 		 * @param bool $cookie (TRUE or FALSE) Save the keys as cookie (true) or not (false) 
 		 */		
-		 public function setup($consumer_key, $consumer_secret, $cookie) {
+		 public function appSetup($consumer_key, $consumer_secret, $cookie) {
 		 	$this->consumer_key = $consumer_key;
 			$this->consumer_secret = $consumer_secret;
 			//Cookie content
@@ -164,8 +163,8 @@
 			//Get the response 
 		  	$response = $this->Oauth->request($request);
 		  	parse_str($response, $response);
-			//print_r($response);
-			$this->setOauthUserKeys($response['oauth_token'], $response['oauth_token_secret']);
+			//Setup a new Twitter user
+			$this->setTwitterUser($response['oauth_token'], $response['oauth_token_secret']);
 		}
 		
 		/*
@@ -175,7 +174,7 @@
 		 * @param string $oauth_secret The oauth secret 
 		 * @param string $oauth_vertifier The oauth vertifier
 		 */
-		function setOauthUserKeys($oauth_token, $oauth_token_secret) {
+		public function setTwitterUser($oauth_token, $oauth_token_secret) {
 			$current_session = $this->Session->read('Twitter.OAuth.User');
 			if(!is_null($current_session)) $this->Session->delete('Twitter.OAuth.User');
 			//Update class vars
@@ -190,6 +189,8 @@
 			$this->Session->write('Twitter.OAuth.User', $new_session);
 		}
 		
+		
+		//===Twitter User Methods
 		/*
 		 * Return the current oauth token and oauth token secret of the user and make
 		 * them usable in the controller. Be carefull in usage! (Secret and user-specific informations)
@@ -197,7 +198,7 @@
 		 * @access public
 		 * @return array() 
 		 */
-		function getOauthUserKeys() {
+		public function getTwitterUser() {
 			$user_keys = array();
 			if($this->oauth_token == '' || $this->oauth_token_secret == '') {
 				$session = $this->Session->read('Twitter.OAuth.User');
@@ -212,6 +213,19 @@
 			}
 			return $user_keys;
 		}
+		/*
+		 * Logout the current Twitter User (destroy Sessions)
+		 * 
+		 * @access public
+		 */ 
+		public function logoutTwitterUser() {
+			//Set local keys to null
+			$this->oauth_token = '';
+			$this->oauth_token_secret = '';
+			//Destroy session
+			if(!is_null($this->Session->read('Twitter.OAuth.User'))) $this->Session->delete('Twitter.OAuth.User');
+		}
+		//===
 		
 		/*
 		 * Controller before setup - Initialized before the controllers beforeFilter()
@@ -246,7 +260,45 @@
 			}
 			$this->controller =& $controller;
 		}
-		//----
+		//===App-Status Methods
+		
+		/*
+		 * Status of the app (checks if consumer key and consumer secret are available)
+		 * 
+		 * @access public
+		 * @return boolean
+		 */
+		public function appStatus() {
+			if($this->consumer_key != '' && $this->consumer_secret != '') return true;
+			else return false;
+		}
+		/*
+		 * Status of the Twitter user (Checks if OAuth token and OAuth secret are available)
+		 * 
+		 * @access public
+		 * @return boolean
+		 */
+		public function userStatus() {
+			if($this->appStatus() == true) {
+				if($this->oauth_token != '' && $this->oauth_token_secret != '') return true;
+				else return false;
+			}
+			else return false;
+		}
+		/*
+		 * Status of the whole Twitter connection
+		 * 
+		 * @access public
+		 * @return boolean
+		 */
+		public function status() {
+			if($this->consumer_key != '' && $this->consumer_secret != '' && $this->oauth_token != '' && $this->oauth_token_secret != '') {
+				return true;
+			}
+			else return false;
+		}
+		//===
+		
 		
 		/*
 		 * Return the auth array for the Twitter API methods
