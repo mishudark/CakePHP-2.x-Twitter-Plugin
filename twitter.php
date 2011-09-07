@@ -2,21 +2,17 @@
 	/*
 	 * CakePHP TwitterComponent
 	 * 
-	 * This is an easy component for CakePHP to handle with the Twitter API. It includes also 
-	 * the authorization via OAuth and the CakePHP HttpSocket, allowd trough the 'http_socket_oauth' by 
-	 * Neil Crookes <www.neilcrookes.com>. 
-	 * With this component you can easely call the main Twitter API methods, such as status updates, users
-	 * or timelines, in your controllers when your application is authorized.
-	 * Before you start visit https://dev.twitter.com/apps/new and register your own app to get your 
-	 * OAuthConsumer and OAuthConsumerSecret. Then you are able to start and connect your CakePHP-App
-	 * with twitter.
+	 * This is a plugin for CakePHP to connect your app with the Twitter API using OAuth.
+	 * With this plugin it's possible to access the main API methods (such as status updates, timelines or user) of the Twitter 	 * API in all of your controllers. You even have the opportunity to make custom API-Calls with this plugin.
+	 * The plugin uses 'http_socket_oauth' (https://github.com/neilcrookes/http_socket_oauth) by Neil Crookes      		<www.neilcrookes.com> as extension for the CakePHP 'HttpSocket'.  
+	 *
 	 * 
 	 * @author Florian Nitschmann (f.nitschmann@media-n.net)
 	 * @links www.florian-nitschmann.de / www.media-n.net
 	 * @copyright (c) 2011 Florian Nitschman/media-n
 	 * @license MIT License - http://www.opensource.org/licenses/mit-license.php
 	 */
-	 require_once 'oauth_socket.php';
+	 App::import('Vendor', 'Twitter.HttpSocketOauth');
 	 
 	 class TwitterComponent extends Object {
 	 	//The component name
@@ -51,64 +47,26 @@
 		 * @param string $consumer_secret OAuth consumer secret of Twitter app
 		 * @param bool $cookie (TRUE or FALSE) Save the keys as cookie (true) or not (false) 
 		 */		
-		 public function appSetup($consumer_key, $consumer_secret, $cookie) {
+		 public function appSetup($consumer_key, $consumer_secret) {
 		 	$this->consumer_key = $consumer_key;
 			$this->consumer_secret = $consumer_secret;
 			//Cookie content
 			$cookie_content = array(
-				'consumer_key' => $this->consumer_key,
-				'consumer_secret' => $this->consumer_secret
+				'consumer_key' => base64_encode($this->consumer_key),
+				'consumer_secret' => base64_encode($this->consumer_secret)
 			);
-			//If a cookie is allowed 
-			if($cookie == true) {
-				//OAuth Consumer Cookie
-				$oauth_cookie = $this->Cookie->read('Twitter.OAuth.Consumer');
-				//Check if $oauth_cookie is_null
-				if(is_null($oauth_cookie)) $this->Cookie->write('Twitter.OAuth.Consumer', $cookie_content, true, '+365 day');
-				else if($this->consumer_key != $consumer_key || $this->consumer_secret != $consumer_secret) {
-					$this->Cookie->delete('Twitter.OAuth.Consumer');
-					$this->Cookie->write('Twitter.OAuth.Consumer', $cookie_content, true, '+365 day');
-				}
-			}
 			//Write keys in local session store
 			$this->Session->write('Twitter.OAuth.Consumer', $cookie_content);
 		 }
 		 
 		 /*
-		  * Change the local consumer key and consumer secret after the setup() and manuell
-		  * 
-		  * @access public
-		  * @param string $consumer_key The consumer key for your Twitter app
-		  * @param string $consumer_secret The consumer secret for your Twitter app
-		  * @param bool $cookie TRUE: The keys are stored in a local CakeCookie 
-		  * FALSE: The keys are just stored in a local session and not in a CakeCookie
-		  */
-		 public function setOauthConsumerKeys($consumer_key, $consumer_secret, $cookie) {
-		 	//Update / set the local class vars
-		 	$this->consumer_key = $consumer_key;
-			$this->consumer_secret = $consumer_secret;
-			//Content for session and cookie
-			$content = array(
-				'consumer_key' => $this->consumer_key,
-				'consumer_secret' => $this->consumer_secret				
-			);
-			//Check if cookie is allowed
-			if($cookie == true) {
-				if(!is_null($this->Cookie->read('Twitter.OAuth.Consumer'))) $this->Cookie->delete('Twitter.OAuth.Consumer');
-				$this->Cookie->write('Twitter.OAuth.Consumer', $content, true, '+365 day'); 
-			}
-			//Setup local session
-			$this->Session->write('Twitter.OAuth.Consumer', $content);
-		 }
-		 
-		 /*
-		  * Connect app to twitter and let it authorize.
+		  * Connect app to twitter and authorize it by the user.
 		  * 
 		  * @param string $callback Url where Twitter should redirect after authorisation 
 		  * (Should be a function in the controller weher $this->Twitter->callback() is called)
 		  * @access public  
 		  */
-		 public function connect($callback) {
+		 public function twitterSetupConnect($callback) {
 			$request = array(
 			    'uri' => array(
 			      'host' => 'api.twitter.com',
@@ -144,7 +102,7 @@
 		 * @param string $oauth_token The token send back by Twitter to the callback url,
 		 * @param string $$oauth_vertifier: The vertifier send back by Twitter to the callback url
 		 */
-		public function callback($oauth_token, $oauth_vertifier) {
+		public function twitterSetupCallback($oauth_token, $oauth_vertifier) {
 			//Build request
 			$request = array(
 		    	'uri' => array(
@@ -164,7 +122,7 @@
 		  	$response = $this->Oauth->request($request);
 		  	parse_str($response, $response);
 			//Setup a new Twitter user
-			$this->setTwitterUser($response['oauth_token'], $response['oauth_token_secret']);
+			$this->loginTwitterUser($response['oauth_token'], $response['oauth_token_secret']);
 		}
 		
 		/*
@@ -174,9 +132,8 @@
 		 * @param string $oauth_secret The oauth secret 
 		 * @param string $oauth_vertifier The oauth vertifier
 		 */
-		public function setTwitterUser($oauth_token, $oauth_token_secret) {
-			$current_session = $this->Session->read('Twitter.OAuth.User');
-			if(!is_null($current_session)) $this->Session->delete('Twitter.OAuth.User');
+		public function loginTwitterUser($oauth_token, $oauth_token_secret) {
+			if(!is_null($this->Session->read('Twitter.OAuth.User'))) $this->Session->delete('Twitter.OAuth.User');
 			//Update class vars
 			$this->oauth_token = $oauth_token;
 			$this->oauth_token_secret = $oauth_token_secret;
@@ -194,24 +151,22 @@
 		/*
 		 * Return the current oauth token and oauth token secret of the user and make
 		 * them usable in the controller. Be carefull in usage! (Secret and user-specific informations)
+		 * Optional: Return the full profile of the user
 		 * 
 		 * @access public
+		 * @param boolean $show_profile Set true to show the full userprofile
 		 * @return array() 
 		 */
-		public function getTwitterUser() {
+		public function showTwitterUser($show_profile = false) {
 			$user_keys = array();
-			if($this->oauth_token == '' || $this->oauth_token_secret == '') {
-				$session = $this->Session->read('Twitter.OAuth.User');
-				if(!is_null($session)) {
-					$user_keys['oauth_token'] = $session['oauth_token'];
-					$user_keys['oauth_token_secret'] = $session['oauth_token_secret'];
-				}								
-			}
-			else {
+			if($this->userStatus() == true) {
 				$user_keys['oauth_token'] = $this->oauth_token;
 				$user_keys['oauth_token_secret'] = $this->oauth_token_secret;
+				if($show_profile == true) $user_keys['profile'] = $this->accountVerifyCredentials();
+				//Return array()
+				return $user_keys;
 			}
-			return $user_keys;
+			else return null;
 		}
 		/*
 		 * Logout the current Twitter User (destroy Sessions)
@@ -220,8 +175,8 @@
 		 */ 
 		public function logoutTwitterUser() {
 			//Set local keys to null
-			$this->oauth_token = '';
-			$this->oauth_token_secret = '';
+			$this->oauth_token = null;
+			$this->oauth_token_secret = null;
 			//Destroy session
 			if(!is_null($this->Session->read('Twitter.OAuth.User'))) $this->Session->delete('Twitter.OAuth.User');
 		}
@@ -232,34 +187,32 @@
 		 */
 		function initialize(&$controller, $settings = array()) {
 			//Open a new OAuthSocket
-		 	$this->Oauth = new OAuthSocket();
-			//Check $this->consumer_key and $this->consumer_secret
-			if($this->consumer_key == '' || $this->consumer_secret == '') {
-				$cookie = $this->Cookie->read('Twitter.OAuth.Consumer');
-				if(!is_null($cookie)) {
-					$this->consumer_key = $cookie['consumer_key'];
-					$this->consumer_secret = $cookie['consumer_secret'];
-				}
-				//Use the local session if cookie isn't set
-				else {
-					$consumer_session = $this->Session->read('Twiter.OAuth.Consumer');
-					if(!is_null($consumer_session)) {
-						$this->oauth_token = $consumer_session['oauth_token'];
-						$this->oauth_token_secret = $consumer_session['oauth_token_secret'];
+		 	$this->Oauth = new HttpSocketOauth();
+			//Check status of the connection
+			if($this->status() == false) {	
+				//AppStatus
+				if($this->appStatus() == false) {
+					//Check session 
+					$app_session = $this->Session->read('Twitter.OAuth.Consumer');
+					if(!is_null($app_session)) {
+						$this->consumer_key = base64_encode($app_session['consumer_key']);
+						$this->consumer_secret = base64_encode($app_session['consumer_secret']);
 					}
-				}	
-			}
-			//Check $oauth_token and $oauth_token_secret
-			if($this->oauth_token == '' || $this->oauth_token_secret == '') {
-				//Look for the session
-				$oauth_session = $this->Session->read('Twitter.OAuth.User');
-				if(!is_null($oauth_session)) {
-					$this->oauth_token = $oauth_session['oauth_token'];
-					$this->oauth_token_secret = $oauth_session['oauth_token_secret'];
+				}
+				//UserStatus 
+				if($this->userStatus() == true) {
+					//Check Session
+					$user_session = $this->Session->read('Twitter.OAuth.User');
+					if(!is_null($user_session)) {
+						$this->oauth_token = $user_session['oauth_token'];
+						$this->oauth_token_secret = $user_session['oauth_token_secret'];
+					}
 				}
 			}
+			//---
 			$this->controller =& $controller;
 		}
+		
 		//===App-Status Methods
 		
 		/*
@@ -280,8 +233,8 @@
 		 */
 		public function userStatus() {
 			if($this->appStatus() == true) {
-				if($this->oauth_token != '' && $this->oauth_token_secret != '') return true;
-				else return false;
+			 	if($this->oauth_token != '' && $this->oauth_token_secret != '') return true;
+			 	else return false;
 			}
 			else return false;
 		}
@@ -292,9 +245,7 @@
 		 * @return boolean
 		 */
 		public function status() {
-			if($this->consumer_key != '' && $this->consumer_secret != '' && $this->oauth_token != '' && $this->oauth_token_secret != '') {
-				return true;
-			}
+			if($this->appStatus() == true && $this->userStatus() == true) return true;
 			else return false;
 		}
 		//===
