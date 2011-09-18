@@ -17,3 +17,16 @@ The plugin uses 'http_socket_oauth' (https://github.com/neilcrookes/http_socket_
 * PHP Version: 5.2+
 * CakePHP Version: 1.3 Stable
 * A Twitter (API) app (Registration: https://dev.twitter.com/apps/new)
+
+
+### Installation:
+
+https://github.com/fnitschmann/CakePHP-Twitter-Plugin/wiki/Installation
+
+### Function Reference:
+
+https://github.com/fnitschmann/CakePHP-Twitter-Plugin/wiki/Function-Reference
+
+### Wiki:
+
+https://wiki.github.com/fnitschmann/CakePHP-Twitter-Plugin
