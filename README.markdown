@@ -5,8 +5,11 @@ With this plugin it's possible to access the main API methods (such as status up
 The plugin uses 'http_socket_oauth' (https://github.com/neilcrookes/http_socket_oauth) by Neil Crookes <www.neilcrookes.com> as extension for the CakePHP 'HttpSocket'. 
 
 @author Florian Nitschmann (f.nitschmann@media-n.net)
+
 @links www.media-n.net
+
 @copyright (C) 2011 media-n (www.media-n.net)
+
 @license MIT License (http://www.opensource.org/licenses/mit-license.php)
 
 ### Requirements:
