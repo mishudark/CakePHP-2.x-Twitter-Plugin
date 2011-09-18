@@ -1,19 +1,15 @@
 <?php
 	/*
-	 * CakePHP TwitterComponent
+	 * twitter.php - The main component file
 	 * 
-	 * This is an easy component for CakePHP to handle with the Twitter API. It includes also 
-	 * the authorization via OAuth and the CakePHP HttpSocket, allowd trough the 'http_socket_oauth' by 
-	 * Neil Crookes <www.neilcrookes.com>. 
-	 * With this component you can easely call the main Twitter API methods, such as status updates, users
-	 * or timelines, in your controllers when your application is authorized.
-	 * Before you start visit https://dev.twitter.com/apps/new and register your own app to get your 
-	 * OAuthConsumer and OAuthConsumerSecret. Then you are able to start and connect your CakePHP-App
-	 * with twitter.
+	 * This is a plugin for CakePHP to connect your app with the Twitter API using OAuth. 
+	 * With this plugin it's possible to access the main API methods 
+	 * (such as status updates, timelines or user) of the Twitter API in all of your controllers. 
+	 * You even have the opportunity to make custom API-Calls with this plugin. 
 	 * 
 	 * @author Florian Nitschmann (f.nitschmann@media-n.net)
-	 * @links www.florian-nitschmann.de / www.media-n.net
-	 * @copyright (c) 2011 Florian Nitschman/media-n
+	 * @link www.media-n.net
+	 * @copyright (c) 2011 media-n (www.media-n.net)
 	 * @license MIT License - http://www.opensource.org/licenses/mit-license.php
 	 */
 	 App::import('Vendor', 'Twitter.HttpSocketOauth');
