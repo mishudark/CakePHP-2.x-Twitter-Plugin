@@ -13,10 +13,11 @@ NOTE: This plugin does not support the "Twitter for Websites" Features (https://
 
 @license MIT License (http://www.opensource.org/licenses/mit-license.php)
 
+@conttrib mishudark (mishu.drk@gmail.com)
 ### Requirements:
 
 * PHP Version: 5.2+
-* CakePHP Version: 1.3 Stable
+* CakePHP Version: 2.0 Stable
 * A Twitter (API) app (Registration: https://dev.twitter.com/apps/new)
 
 
