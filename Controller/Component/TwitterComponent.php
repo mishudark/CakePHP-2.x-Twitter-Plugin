@@ -245,7 +245,7 @@ class TwitterComponent extends Object {
     if($this->status() == false) {
       //Check app status
       if($this->appStatus() == false) {
-        $consumer_session = CakeSession::read('Twiter.Consumer');
+        $consumer_session = CakeSession::read('Twitter.Consumer');
         if(!is_null($consumer_session)) {
           $this->oauth_token = $consumer_session['oauth_token'];
           $this->oauth_token_secret = $consumer_session['oauth_token_secret'];
