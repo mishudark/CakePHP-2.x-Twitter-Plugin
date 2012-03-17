@@ -93,26 +93,25 @@ class TwitterBehavior extends ModelBehavior {
  * @access public
  */
 	public function reAuthorizeTwitterUser($Model, $oauth_token, $oauth_vertifier) {
-    	$request = array(
-      	'uri' => array(
-       	 	'host' => 'api.twitter.com',
-        	'path' => '/oauth/request_token',
-      		),
-      	'method' => 'GET',
-      	'auth' => array(
-        	'method' => 'OAuth',
-        	'oauth_callback' => $callback_url,
-        	'oauth_consumer_key' => 'USyRjvOuSvFgakcSy2aUA',
-        	'oauth_consumer_secret' => 'RzZ6eGSAkyX9glDyFHFNJX1FE26iVV0uunMzdMZkII',
-      		),
-    	);
+    	/*$request = array(
+      		'uri' => array(
+	       	 	'host' => 'api.twitter.com',
+	        	'path' => '/oauth/request_token',
+	      		),
+	      	'method' => 'GET',
+	      	'auth' => array(
+	        	'method' => 'OAuth',
+	        	'oauth_callback' => 'http://'.$_SERVER['HTTP_HOST'],
+	        	'oauth_consumer_key' => 'USyRjvOuSvFgakcSy2aUA',
+	        	'oauth_consumer_secret' => 'RzZ6eGSAkyX9glDyFHFNJX1FE26iVV0uunMzdMZkII',
+	      		),
+	    	);
     	$response = $this->Oauth->request($request);
-		debug($response);
     	// Redirect user to twitter to authorize application
     	parse_str($response, $response);
 		
 		
-		debug($response);
+		debug($response);*/
 		
 		//Build request
 		$request = array(
@@ -124,15 +123,21 @@ class TwitterBehavior extends ModelBehavior {
 			'auth' => array(
 				'method' => 'OAuth',
         		'oauth_consumer_key' => 'USyRjvOuSvFgakcSy2aUA',
-        		'oauth_consumer_secret' => 'RzZ6eGSAkyX9glDyFHFNJX1FE26iVV0uunMzdMZkII',
-				'oauth_token' => $oauth_token,
-				'oauth_verifier' => $oauth_vertifier,
+        		//'oauth_consumer_secret' => 'RzZ6eGSAkyX9glDyFHFNJX1FE26iVV0uunMzdMZkII',
+				//'oauth_token' => '18295813-H35yC0ddiVkyGqpPuX3aUl70vgYlu8Uo9FRs4fLho',
+				//'oauth_token_secret' => $oauth_vertifier,
+				//'oauth_verifier' => '18295813-H35yC0ddiVkyGqpPuX3aUl70vgYlu8Uo9FRs4fLho',
+				'oauth_token' => 'Fd9R4Y6wu3Q9lgzC5dbZsZgerdUdZqkhaMivwccl4',
+				),
+			'body' => array(
+				'oauth_verifier' => '2tHXdaEx36jbuT2s49s58QuUiztBjw77Nl18iJKdhgU',
 				),
 			);
 		
 		// Get the response	
 		debug($request);
-		$response = $this->Oauth->request($request);	
+		$response = $this->Oauth->request($request);
+		debug($response);	
 		parse_str($response, $response);
 		debug($response);
 		// Setup a new Twitter user		

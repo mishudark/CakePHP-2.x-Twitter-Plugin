@@ -104,18 +104,18 @@ class TwitterComponent extends Object {
  */
   	public function connectApp($callback_url, $action='authorize') {
     	$request = array(
-      	'uri' => array(
-       	 	'host' => 'api.twitter.com',
-        	'path' => '/oauth/request_token',
-      		),
-      	'method' => 'GET',
-      	'auth' => array(
-        	'method' => 'OAuth',
-        	'oauth_callback' => $callback_url,
-        	'oauth_consumer_key' => $this->consumer_key,
-        	'oauth_consumer_secret' => $this->consumer_secret,
-      		),
-    	);
+      		'uri' => array(
+	       	 	'host' => 'api.twitter.com',
+	        	'path' => '/oauth/request_token',
+	      		),
+	      	'method' => 'GET',
+	      	'auth' => array(
+	        	'method' => 'OAuth',
+	        	'oauth_callback' => $callback_url,
+	        	'oauth_consumer_key' => $this->consumer_key,
+	        	'oauth_consumer_secret' => $this->consumer_secret,
+	      		),
+	    	);
     	$response = $this->Oauth->request($request);
     	// Redirect user to twitter to authorize application
     	parse_str($response, $response);
