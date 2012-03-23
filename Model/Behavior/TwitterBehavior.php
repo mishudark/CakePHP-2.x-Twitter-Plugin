@@ -48,11 +48,11 @@ class TwitterBehavior extends ModelBehavior {
 /**
  * OAuth token and OAuth token secret (The user vars)
  *
- * @access private
+ * @access public
  * @var string $oauth_token The user-specific OAuth token
  * @var string $oauth_token_secret The user-specific OAuth token secret
  */
-  	private $oauth_token, $oauth_token_secret;
+  	public $oauth_token, $oauth_token_secret;
 
 
 /**
@@ -64,86 +64,29 @@ class TwitterBehavior extends ModelBehavior {
 	    $this->Oauth = new HttpSocketOauth();
 	    if($this->status() == false) {
 			//Check app status
+		    $consumerSession = CakeSession::read('Twitter.Consumer');
 			if($this->appStatus() == false) {
-		        $consumer_session = CakeSession::read('Twitter.Consumer');
-		        if(!is_null($consumer_session)) {
-        			$this->oauthToken = !empty($consumer_session['oauth_token']) ? $consumer_session['oauth_token'] : null;
-					$this->oauthTokenSecret = !empty($consumer_session['oauth_token_secret']) ? $consumer_session['oauth_token_secret'] : null;
+		        $consumerSession = CakeSession::read('Twitter.Consumer');
+		        if(!is_null($consumerSession)) {
+        			$this->oauthToken = $consumerSession['oauth_token'];
+					$this->oauthTokenSecret = $consumerSession['oauth_token_secret'];
 				}
 			}
-			//Check $oauth_token and $oauth_token_secret
-			if($this->userStatus() == false) {
-				//Look for the session
-				$oauth_session = CakeSession::read('Twitter.User');
-				if(!is_null($oauth_session)) {
-					$this->oauthToken = $oauth_session['oauth_token'];
-					$this->oauthTokenSecret = $oauth_session['oauth_token_secret'];
-				}
+			//Look for the session
+			$oauthSession = CakeSession::read('Twitter.User');
+			if($this->userStatus() == false && !empty($oauthSession)) {
+				$this->oauthToken = $oauthSession['oauth_token'];
+				$this->oauthTokenSecret = $oauthSession['oauth_token_secret'];
 			}
+		}
+		
+		if (!empty($settings['oauthToken']) && !empty($settings['oauthTokenSecret'])) {
+			$this->oauthToken = $settings['oauthToken'];
+			$this->oauthTokenSecret = $settings['oauthTokenSecret'];
 		}
 		$this->model =& $Model;
 	}
 	
-
-/**
- * Reconnect app to twitter and let it authorize through an existing user.
- *
- * @param string $callback_url Url where Twitter should redirect after authorisation
- * @param string $action action from twitter api
- * @access public
- */
-	public function reAuthorizeTwitterUser($Model, $oauth_token, $oauth_vertifier) {
-    	/*$request = array(
-      		'uri' => array(
-	       	 	'host' => 'api.twitter.com',
-	        	'path' => '/oauth/request_token',
-	      		),
-	      	'method' => 'GET',
-	      	'auth' => array(
-	        	'method' => 'OAuth',
-	        	'oauth_callback' => 'http://'.$_SERVER['HTTP_HOST'],
-	        	'oauth_consumer_key' => 'USyRjvOuSvFgakcSy2aUA',
-	        	'oauth_consumer_secret' => 'RzZ6eGSAkyX9glDyFHFNJX1FE26iVV0uunMzdMZkII',
-	      		),
-	    	);
-    	$response = $this->Oauth->request($request);
-    	// Redirect user to twitter to authorize application
-    	parse_str($response, $response);
-		
-		
-		debug($response);*/
-		
-		//Build request
-		$request = array(
-			'uri' => array(
-				'host' => 'api.twitter.com',
-				'path' => '/oauth/access_token',
-				 ),
-			'method' => 'POST',
-			'auth' => array(
-				'method' => 'OAuth',
-        		'oauth_consumer_key' => 'USyRjvOuSvFgakcSy2aUA',
-        		//'oauth_consumer_secret' => 'RzZ6eGSAkyX9glDyFHFNJX1FE26iVV0uunMzdMZkII',
-				//'oauth_token' => '18295813-H35yC0ddiVkyGqpPuX3aUl70vgYlu8Uo9FRs4fLho',
-				//'oauth_token_secret' => $oauth_vertifier,
-				//'oauth_verifier' => '18295813-H35yC0ddiVkyGqpPuX3aUl70vgYlu8Uo9FRs4fLho',
-				'oauth_token' => 'Fd9R4Y6wu3Q9lgzC5dbZsZgerdUdZqkhaMivwccl4',
-				),
-			'body' => array(
-				'oauth_verifier' => '2tHXdaEx36jbuT2s49s58QuUiztBjw77Nl18iJKdhgU',
-				),
-			);
-		
-		// Get the response	
-		debug($request);
-		$response = $this->Oauth->request($request);
-		debug($response);	
-		parse_str($response, $response);
-		debug($response);
-		// Setup a new Twitter user		
-		$this->loginTwitterUser($response['oauth_token'], $response['oauth_token_secret'], $response['user_id'], $response['screen_name']);
-		
-	}
 
 /**
  * The user authorisation, wich should be called after the user was redirected by Twitter
@@ -296,7 +239,7 @@ class TwitterBehavior extends ModelBehavior {
  * @access private
  * @return array()
  */
-  	private function authArray() {
+  	protected function authArray() {
     	return array(
 			'method' => 'OAuth',
       		'oauth_token' => $this->oauthToken,
