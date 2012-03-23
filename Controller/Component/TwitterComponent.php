@@ -167,7 +167,6 @@ class TwitterComponent extends Object {
 				'oauth_verifier' => $oauth_vertifier,
 				),
 			);
-		
 		// Get the response
 		$response = $this->Oauth->request($request);
 		parse_str($response, $response);
@@ -223,7 +222,7 @@ class TwitterComponent extends Object {
 	    }
     	if($show_full_profile == true) {
 			$userKeys['profile'] = $this->accountVerifyCredentials();
-		}
+		}		
 		return $userKeys;
 	}
 	
