@@ -11,7 +11,7 @@ With this plugin it's possible to access the main API methods (such as status up
 * Go to YOURSITE/twitter/twitter/connect
 * Put some code that will send an update to Twitter in another controller (maybe something like...)
 
-```public function afterSave($created) {
+	public function afterSave($created) {
 
 		$oauth_token = [either a session or from where the token is saved in db];
 		
@@ -27,7 +27,7 @@ With this plugin it's possible to access the main API methods (such as status up
 			
 		$this->updateStatus('Some message you want to tweet');
 		
-	}```
+	}
 
 The plugin uses 'http_socket_oauth' (https://github.com/neilcrookes/http_socket_oauth) by Neil Crookes <www.neilcrookes.com> as extension for the CakePHP 'HttpSocket'. 
 
