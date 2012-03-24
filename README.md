@@ -3,13 +3,15 @@
 This is a plugin for CakePHP to connect your app with the Twitter API using OAuth.
 With this plugin it's possible to access the main API methods (such as status updates, timelines or user) of the Twitter API in all of your controllers. You even have the opportunity to make custom API-Calls with this plugin.
 
+It has a component and a behavior which are largely similar.  (If anyone knows a way to combine the code from both into one reusable area please do tell)
+
 ### Usage
 
 * Upload to app/Plugin/Twitter
 * Rename Config/twitter.default.php to Config/twitter.php
 * Update the config file with your twitter app keys
 * Go to YOURSITE/twitter/twitter/connect
-* Put some code that will send an update to Twitter in another controller (maybe something like...)
+* (as one example) Put some code that will send an update to Twitter in a model (maybe something like...)
 
 		public function afterSave($created) {
 			$oauth_token = [either a session or from where the token is saved in db];
@@ -31,6 +33,11 @@ NOTE: This plugin does not support the "Twitter for Websites" Features (https://
 * PHP Version: 5.2+
 * CakePHP Version: 2.0 Stable
 * A Twitter (API) app (Registration: https://dev.twitter.com/apps/new)
+
+### Issues 
+
+https://github.com/zuha/twitter-cakephp-plugin/issues
+
 
 ### Additional Links From Original Fork:
 
