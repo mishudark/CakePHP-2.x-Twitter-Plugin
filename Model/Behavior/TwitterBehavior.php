@@ -18,7 +18,7 @@
 App::import('Vendor', 'Twitter.HttpSocketOauth');
 App::uses('CakeSession', 'Model/Datasource');
 
-class TwitterComponent extends Object {
+class TwitterBehavior extends ModelBehavior {
 
 /**
  * Twitter consumer key & consumer secret
@@ -43,104 +43,49 @@ class TwitterComponent extends Object {
  * @var array
  */
   	private $__callbacks = array();
-
-/**
- * Used to track that the startup method has been called.
- * @access public
- * @return void
- */
- 	public function startup () {
-    	$this->__callbacks[] = 'startup';
-  	}
-
-/**
- * Used to track that the beforeRender method has been called.
- * @access public
- * @return void
- */
-  	public function beforeRender () {
-    	$this->__callbacks[] = 'beforeRender';
-  	}
-
-/**
- * Used to track that the shutdown method has been called.
- * @access public
- * @return void
- */
-  	public function shutdown () {
-   		$this->__callbacks[] = 'shutdown';
-  	}
-
-
-/**
- * Setup the counsumer key and consumer secret for the app.
- *
- * @access public
- * @param string $consumer_key OAuth consumer key of the Twitter app
- * @param string $consumer_secret OAuth consumer secret of the Twitter app
- */
-	public function setupApp($consumer_key, $consumer_secret) {
-    	$this->consumer_key = $consumer_key;
-	    $this->consumer_secret = $consumer_secret;
-    	//Cookie content
-	    $content = array(
-	      'consumer_key' => $this->consumer_key,
-	      'consumer_secret' => $this->consumer_secret
-	    );
-	    //Check if session isset
-	    if(!is_null(CakeSession::read('Twitter.Consumer'))) {
-			CakeSession::delete('Twitter.Consumer');
-		}
-	    //Write keys in local session store
-	    CakeSession::write('Twitter.Consumer', $content);
-	}
-
-/**
- * Connect app to twitter and let it authorize through the user.
- *
- * @param string $callback_url Url where Twitter should redirect after authorisation
- * @param string $action action from twitter api
- * @access public
- */
-  	public function connectApp($callback_url, $action='authorize') {
-    	$request = array(
-      		'uri' => array(
-	       	 	'host' => 'api.twitter.com',
-	        	'path' => '/oauth/request_token',
-	      		),
-	      	'method' => 'GET',
-	      	'auth' => array(
-	        	'method' => 'OAuth',
-	        	'oauth_callback' => $callback_url,
-	        	'oauth_consumer_key' => $this->consumer_key,
-	        	'oauth_consumer_secret' => $this->consumer_secret,
-	      		),
-	    	);
-    	$response = $this->Oauth->request($request);
-    	// Redirect user to twitter to authorize application
-    	parse_str($response, $response);
-    	header("Location: http://api.twitter.com/oauth/$action?oauth_token={$response['oauth_token']}");
-    	exit();
-	}
-
-/**
- * Authenticate User with their twitter account.
- *
- * @param string $callback_url Url where Twitter should redirect after authentication
- * @access public
- */
-  	public function signIn($callback_url) {
-    	$this->connectApp($callback_url, 'authenticate');
-  	}
+	
 
 /**
  * OAuth token and OAuth token secret (The user vars)
  *
- * @access private
+ * @access public
  * @var string $oauth_token The user-specific OAuth token
  * @var string $oauth_token_secret The user-specific OAuth token secret
  */
-  	private $oauth_token, $oauth_token_secret;
+  	public $oauth_token, $oauth_token_secret;
+
+
+/**
+ * Model before setup - Initialized before the controllers beforeFilter()
+ */
+
+	public function setup(&$Model, $settings = array()) {
+    	//Open a new OAuthSocket
+	    $this->Oauth = new HttpSocketOauth();
+	    if($this->status() == false) {
+			//Check app status
+		    $consumerSession = CakeSession::read('Twitter.Consumer');
+			if($this->appStatus() == false) {
+		        $consumerSession = CakeSession::read('Twitter.Consumer');
+		        if(!is_null($consumerSession)) {
+        			$this->oauthToken = $consumerSession['oauth_token'];
+					$this->oauthTokenSecret = $consumerSession['oauth_token_secret'];
+				}
+			}
+			//Look for the session
+			$oauthSession = CakeSession::read('Twitter.User');
+			if($this->userStatus() == false && !empty($oauthSession)) {
+				$this->oauthToken = $oauthSession['oauth_token'];
+				$this->oauthTokenSecret = $oauthSession['oauth_token_secret'];
+			}
+		}
+		
+		if (!empty($settings['oauthToken']) && !empty($settings['oauthTokenSecret'])) {
+			$this->oauthToken = $settings['oauthToken'];
+			$this->oauthTokenSecret = $settings['oauthTokenSecret'];
+		}
+		$this->model =& $Model;
+	}
 	
 
 /**
@@ -151,7 +96,7 @@ class TwitterComponent extends Object {
  * @param string $oauth_token The token send back by Twitter to the callback url,
  * @param string $$oauth_vertifier: The vertifier send back by Twitter to the callback url
  */
-	public function authorizeTwitterUser($oauth_token, $oauth_vertifier) {
+	public function authorizeTwitterUser($Model, $oauth_token, $oauth_vertifier) {
 		//Build request
 		$request = array(
 			'uri' => array(
@@ -167,8 +112,9 @@ class TwitterComponent extends Object {
 				'oauth_verifier' => $oauth_vertifier,
 				),
 			);
-		// Get the response
-		$response = $this->Oauth->request($request);
+		
+		// Get the response		
+		$response = $this->Oauth->request($request);	
 		parse_str($response, $response);
 		// Setup a new Twitter user		
 		$this->loginTwitterUser($response['oauth_token'], $response['oauth_token_secret'], $response['user_id'], $response['screen_name']);
@@ -208,7 +154,7 @@ class TwitterComponent extends Object {
  * @return array()
  * @param boolean $show_full_profile
  */
-	public function getTwitterUser($show_full_profile = false) {
+	public function getTwitterUser($Model, $show_full_profile = false) {
     	$userKeys = array();
 	    if($this->userStatus() == false) {
     		$session = CakeSession::read('Twitter.User');
@@ -222,7 +168,7 @@ class TwitterComponent extends Object {
 	    }
     	if($show_full_profile == true) {
 			$userKeys['profile'] = $this->accountVerifyCredentials();
-		}		
+		}
 		return $userKeys;
 	}
 	
@@ -240,35 +186,7 @@ class TwitterComponent extends Object {
 	    if(!is_null(CakeSession::read('Twitter.User'))) CakeSession::delete('Twitter.User');
 	}
 
-/**
- * Controller before setup - Initialized before the controllers beforeFilter()
- */
-	public function initialize(&$controller, $settings = array()) {
-    	//Open a new OAuthSocket
-	    $this->Oauth = new HttpSocketOauth();
-	    if($this->status() == false) {
-			//Check app status
-			if($this->appStatus() == false) {
-		        $consumer_session = CakeSession::read('Twitter.Consumer');
-		        if(!is_null($consumer_session)) {
-        			$this->oauthToken = !empty($consumer_session['oauth_token']) ? $consumer_session['oauth_token'] : null;
-					$this->oauthTokenSecret = !empty($consumer_session['oauth_token_secret']) ? $consumer_session['oauth_token_secret'] : null;
-				}
-			}
-			//Check $oauth_token and $oauth_token_secret
-			if($this->userStatus() == false) {
-				//Look for the session
-				$oauth_session = CakeSession::read('Twitter.User');
-				if(!is_null($oauth_session)) {
-					$this->oauthToken = $oauth_session['oauth_token'];
-					$this->oauthTokenSecret = $oauth_session['oauth_token_secret'];
-				}
-			}
-		}
-		$this->controller =& $controller;
-	}
-
-
+//===Status Methods
 /**
  * Status of the app (checks if consumer key and consumer secret are available)
  *
@@ -321,7 +239,7 @@ class TwitterComponent extends Object {
  * @access private
  * @return array()
  */
-  	private function authArray() {
+  	protected function authArray() {
     	return array(
 			'method' => 'OAuth',
       		'oauth_token' => $this->oauthToken,
@@ -331,8 +249,6 @@ class TwitterComponent extends Object {
    	 		);
   	}
 
-
-//====================Twitter API methods
 
 /**
  * Make a custom request on the Twitter API
@@ -344,7 +260,7 @@ class TwitterComponent extends Object {
  * e.g. /1/trends.json
  * @param array() $body The body of the api request. It has to be an valid array()
  */
-	public function apiRequest($method, $twitterMethodUrl, $body) {
+	public function apiRequest($Model, $method, $twitterMethodUrl, $body) {
     	$request = array();
 
 		//Method
@@ -374,11 +290,9 @@ class TwitterComponent extends Object {
 		  	//Set the request body
 		  	$request['body'] = $body;
 		}
-		//Return
+		//Return		
 		return $this->Oauth->request($request);
 	}
-
-  #Account Methods
 
 /**
  * Returns an HTTP 200 OK response code and a representation of the
@@ -389,9 +303,9 @@ class TwitterComponent extends Object {
  * @access public
  * @return array
  */
-	public function accountVerifyCredentials() {
+	public function accountVerifyCredentials($Model) {
     	//Request & return
-	    return json_decode($this->apiRequest('get', '/1/account/verify_credentials.json', ''), true);
+	    return json_decode($this->apiRequest($Model, 'get', '/1/account/verify_credentials.json', ''), true);
 	}
 
 
@@ -405,9 +319,9 @@ class TwitterComponent extends Object {
  * @access public
  * @return array()
  */
-	public function accountRateLimitStatus() {
+	public function accountRateLimitStatus($Model) {
     	//Request & return
-    	return json_decode($this->apiRequest('get', '/1/account/rate_limit_status.json', ''), true);
+    	return json_decode($this->apiRequest($Model, 'get', '/1/account/rate_limit_status.json', ''), true);
   	}
 
 
@@ -423,9 +337,9 @@ class TwitterComponent extends Object {
  * @param int $count The count how many messages should be shown (max. 200)
  * @param int $page Specifies the page of direct messages to retrieve
  */
- 	public function getDirectMessages() {
+ 	public function getDirectMessages($Model) {
     	//Return
-	    return json_decode($this->apiRequest('get', '/1/direct_messages.json', ''), true);
+	    return json_decode($this->apiRequest($Model, 'get', '/1/direct_messages.json', ''), true);
 	}
 
 
@@ -436,9 +350,9 @@ class TwitterComponent extends Object {
  * @access public
  * @return array()
  */
- 	public function getDirectMessagesSent() {
+ 	public function getDirectMessagesSent($Model) {
 		//Return
-		return json_decode($this->apiRequest('get','/1/direct_messages/sent.json', ''), true);
+		return json_decode($this->apiRequest($Model, 'get','/1/direct_messages/sent.json', ''), true);
 	}
 
 /**
@@ -452,7 +366,7 @@ class TwitterComponent extends Object {
  * (Must be a follower of the authenticating user)
  * @param text $text The message text. Shouldn't be longer than 140 chars
  */
-	public function newDirectMessage($screen_name, $text) {
+	public function newDirectMessage($Model, $screen_name, $text) {
     	//Request body
 	    $body = array();
 	    if($screen_name != '' && $text != '') {
@@ -460,7 +374,7 @@ class TwitterComponent extends Object {
       		$body['text'] = $text;
     	}
     	//Return and request
-    	return json_decode($this->apiRequest('post', '/1/direct_messages/new.json', $body), true);
+    	return json_decode($this->apiRequest($Model, 'post', '/1/direct_messages/new.json', $body), true);
   	}
 
 
@@ -472,9 +386,9 @@ class TwitterComponent extends Object {
  * @return array()
  * @param int $id An unique identifier number of the message.
  */
-	public function destroyDirectMessage($id) {
+	public function destroyDirectMessage($Model, $id) {
     	//Return
-    	return json_decode($this->apiRequest('delete', '/1/direct_messages/destroy/'.$id.'.json', ''), true);
+    	return json_decode($this->apiRequest($Model, 'delete', '/1/direct_messages/destroy/'.$id.'.json', ''), true);
   	}
 
 /**
@@ -484,12 +398,12 @@ class TwitterComponent extends Object {
  * @return array()
  * @param string $screen_name The username
  */
-  	public function getFriendsIds($screen_name) {
+  	public function getFriendsIds($Model, $screen_name) {
     	//Request-body
     	$body = array();
     	$body['screen_name'] = strtolower($screen_name);
     	//Return and request
-    	return json_decode($this->apiRequest('get', '/1/friends/ids.json', $body), true);
+    	return json_decode($this->apiRequest($Model, 'get', '/1/friends/ids.json', $body), true);
   	}
 
 /**
@@ -499,12 +413,12 @@ class TwitterComponent extends Object {
  * @return array()
  * @param string $screen_name The usernam
  */
-  	public function getFollowersIds($screen_name) {
+  	public function getFollowersIds($Model, $screen_name) {
     	//Request-body
     	$body = array();
     	$body['screen_name'] = strtolower($screen_name);
     	//Return and request
-    	return json_decode($this->apiRequest('get', '/1/followers/ids.json', $body), true);
+    	return json_decode($this->apiRequest($Model, 'get', '/1/followers/ids.json', $body), true);
   	}
 
 
@@ -518,14 +432,14 @@ class TwitterComponent extends Object {
  * @return array()
  * @param string $screen_name The uername of the user to be followed
  */
-	public function createFriendship($screen_name) {
+	public function createFriendship($Model, $screen_name) {
     	//Check if $screen_name is string or int (ID)
     	if(!is_numeric($screen_name)) {
       		//Request-body
       		$body = array();
       		$body['screen_name'] = strtolower($screen_name);
       		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/friendships/create.json', $body), true);
+      		return json_decode($this->apiRequest($Model, 'post', '/1/friendships/create.json', $body), true);
     	}
   	}
   
@@ -536,13 +450,13 @@ class TwitterComponent extends Object {
  * @return array()
  * @param int $id The unique identifier of the user
  */
-	public function createFriendshipById($id) {
+	public function createFriendshipById($Model, $id) {
     	if(is_numeric($id)) {
       		//Request-body
       		$body = array();
       		$body['user_id'] = $id;
       		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/friendships/create.json', $body), true);
+      		return json_decode($this->apiRequest($Model, 'post', '/1/friendships/create.json', $body), true);
     	}
   	}
 
@@ -556,13 +470,13 @@ class TwitterComponent extends Object {
  * @retun array()
  * @param string $screen_name The username of the user to unfollow
  */
-	public function destroyFriendship($screen_name) {
+	public function destroyFriendship($Model, $screen_name) {
     	//Request-body
     	if(!is_numeric($screen_name)) {
       		$body = array();
       		$body['screen_name'] = strtolower($screen_name);
       		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/friendships/destroy.json', $body), true);
+      		return json_decode($this->apiRequest($Model, 'post', '/1/friendships/destroy.json', $body), true);
     	}
   	}
   
@@ -574,12 +488,12 @@ class TwitterComponent extends Object {
  * @return array()
  * @param int $id The unique identifier of the user to unfollow
  */
-  	public function destroyFriendshipById($id) {
+  	public function destroyFriendshipById($Model, $id) {
     	if(is_numeric($id)) {
       		$body = array();
       		$body['user_id'] = $id;
       		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/friendships/destroy.json', $body), true);
+      		return json_decode($this->apiRequest($Model, 'post', '/1/friendships/destroy.json', $body), true);
     	}
   	}
 
@@ -593,13 +507,13 @@ class TwitterComponent extends Object {
  * @param string $user_a Screen name of user a
  * @param string $user_b Screen name of user b
  */
-	public function friendshipExists($user_a, $user_b) {
+	public function friendshipExists($Model, $user_a, $user_b) {
     	//Request-body
     	$body = array();
     	$body['user_a'] = $user_a;
     	$body['user_b'] = $user_b;
     	//Return and request
-    	return json_decode($this->apiRequest('get', '/1/friendships/exists.json', $body), true);
+    	return json_decode($this->apiRequest($Model, 'get', '/1/friendships/exists.json', $body), true);
   	}
 
 
@@ -611,10 +525,10 @@ class TwitterComponent extends Object {
  * @return array()
  * @param int $id The id of the tweet
  */
-	public function showStatus($id) {
+	public function showStatus($Model, $id) {
     	if(is_numeric($id)) {
       	//Return and request
-      		return json_decode($this->apiRequest('get', '/1/statuses/show/'.$id.'.json', ''), true);
+      		return json_decode($this->apiRequest($Model, 'get', '/1/statuses/show/'.$id.'.json', ''), true);
     	}
   	}
 
@@ -628,14 +542,14 @@ class TwitterComponent extends Object {
  * @return array()
  * @param string $status The text wich should be posted as new status
  */
-	public function updateStatus($status) {
+	public function updateStatus($Model, $status) {		
     	if($status != null || $status != '') {
       		//Request-body
       		$body = array(
         		'status' => $status
       			);
       		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/statuses/update.json', $body), true);
+      		return json_decode($this->apiRequest($Model, 'post', '/1/statuses/update.json', $body), true);
     	}
   	}
 
@@ -647,10 +561,10 @@ class TwitterComponent extends Object {
  * @return array()
  * @param int $id The ID of the status wich should be destroyed
  */
- 	public function destroyStatus($id) {
+ 	public function destroyStatus($Model, $id) {
     	if(is_numeric($id)) {
       		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/statuses/destroy/'.$id.'.json', ''), true);
+      		return json_decode($this->apiRequest($Model, 'post', '/1/statuses/destroy/'.$id.'.json', ''), true);
     	}
   	}
 
@@ -663,9 +577,9 @@ class TwitterComponent extends Object {
  * @access public
  * @return array()
  */
- 	public function publicTimeline() {
+ 	public function publicTimeline($Model) {
     	//Request & Return
-    	return json_decode($this->apiRequest('get', '/1/statuses/public_timeline.json', ''), true);
+    	return json_decode($this->apiRequest($Model, 'get', '/1/statuses/public_timeline.json', ''), true);
   	}
 
 
@@ -676,9 +590,9 @@ class TwitterComponent extends Object {
  * @access public
  * @return array()
  */
-  	public function friendsTimeline() {
+  	public function friendsTimeline($Model) {
     	//Return and request
-	  	return json_decode($this->apiRequest('get', '/1/statuses/friends_timeline.json', ''), true);
+	  	return json_decode($this->apiRequest($Model, 'get', '/1/statuses/friends_timeline.json', ''), true);
   	}
 
 /**
@@ -688,9 +602,9 @@ class TwitterComponent extends Object {
  * @access public
  * @return array()
  */
- 	public function homeTimeline() {
+ 	public function homeTimeline($Model) {
 		//Return and request
-		return json_decode($this->apiRequest('get', '/1/statuses/home_timeline.json', ''), true);
+		return json_decode($this->apiRequest($Model, 'get', '/1/statuses/home_timeline.json', ''), true);
 	}
 
 /**
@@ -703,7 +617,7 @@ class TwitterComponent extends Object {
  * @return array()
  * @param int || string $param The ID or screen name of the user
  */
-	public function userTimeline($param = null) {
+	public function userTimeline($Model, $param = null) {
     	// Request-body
     	$body = array();
     	// Check if $param is numeric
@@ -716,7 +630,7 @@ class TwitterComponent extends Object {
 			return $this->homeTimeline();
 		}
 		// Return and request
-		return json_decode($this->apiRequest('get', '/1/statuses/user_timeline.json', $body), true);
+		return json_decode($this->apiRequest($Model, 'get', '/1/statuses/user_timeline.json', $body), true);
 	}
 
 
@@ -727,9 +641,9 @@ class TwitterComponent extends Object {
  * @access public
  * @return array()
  */
-  	public function mentionsTimeline() {
+  	public function mentionsTimeline($Model) {
     	//Return and request
-    	return json_decode($this->apiRequest('get', '/1/statuses/mentions.json', ''), true);
+    	return json_decode($this->apiRequest($Model, 'get', '/1/statuses/mentions.json', ''), true);
   	}
 
 
@@ -741,7 +655,7 @@ class TwitterComponent extends Object {
  * @return array()
  * @param int || string $param The ID or screen name of the user
  */
-  	public function showUser($param) {
+  	public function showUser($Model, $param) {
     	//Request-body
     	$body = array();
     	//Check if $param is numeric
@@ -751,6 +665,6 @@ class TwitterComponent extends Object {
 			$body['screen_name'] = strtolower($param);
 		}
 		//Return and request
-		return json_decode($this->apiRequest('get', '/1/users/show.json', $body), true);
+		return json_decode($this->apiRequest($Model, 'get', '/1/users/show.json', $body), true);
 	}
 }
