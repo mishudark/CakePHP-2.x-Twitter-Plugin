@@ -18,7 +18,7 @@
 App::import('Vendor', 'Twitter.HttpSocketOauth');
 App::uses('CakeSession', 'Model/Datasource');
 
-class TwitterComponent extends Object {
+class TwitterComponent extends Component {
 
 /**
  * Twitter consumer key & consumer secret
@@ -43,6 +43,11 @@ class TwitterComponent extends Object {
  * @var array
  */
   	private $__callbacks = array();
+
+/**
+ * Controller instance
+ */
+	public $controller;
 
 /**
  * Used to track that the startup method has been called.
