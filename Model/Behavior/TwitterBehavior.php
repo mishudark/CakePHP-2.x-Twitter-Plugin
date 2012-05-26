@@ -127,7 +127,7 @@ class TwitterBehavior extends ModelBehavior {
 		return $this->_Twitter->showStatus($id);
 	}
 
-	public function updateStatus($Model, $status) {		
+	public function updateStatus($Model, $status) {
 		return $this->_Twitter->updateStatus($status);
 	}
 

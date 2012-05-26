@@ -27,7 +27,7 @@ class Twitter extends Object {
  * @var string $consumer_key The OAuth consumer key
  * @var string $consumer_secret The OAuth consumer secret
  */
- 	private $consumer_key, $consumer_secret;
+	private $consumer_key, $consumer_secret;
 
 /**
  * The OAuthConfig Class and class var
@@ -35,7 +35,7 @@ class Twitter extends Object {
  * @access private
  * @var private $Oauth The HttpSocketOauth class var
  */
- 	private $Oauth;
+	private $Oauth;
 
 
 /**
@@ -46,19 +46,19 @@ class Twitter extends Object {
  * @param string $consumer_secret OAuth consumer secret of the Twitter app
  */
 	public function setupApp($consumer_key, $consumer_secret) {
-    	$this->consumer_key = $consumer_key;
-	    $this->consumer_secret = $consumer_secret;
-    	//Cookie content
-	    $content = array(
-	      'consumer_key' => $this->consumer_key,
-	      'consumer_secret' => $this->consumer_secret
-	    );
-	    //Check if session isset
-	    if(!is_null(CakeSession::read('Twitter.Consumer'))) {
+		$this->consumer_key = $consumer_key;
+		$this->consumer_secret = $consumer_secret;
+		//Cookie content
+		$content = array(
+			'consumer_key' => $this->consumer_key,
+			'consumer_secret' => $this->consumer_secret
+		);
+		//Check if session isset
+		if(!is_null(CakeSession::read('Twitter.Consumer'))) {
 			CakeSession::delete('Twitter.Consumer');
 		}
-	    //Write keys in local session store
-	    CakeSession::write('Twitter.Consumer', $content);
+		//Write keys in local session store
+		CakeSession::write('Twitter.Consumer', $content);
 	}
 
 /**
@@ -68,25 +68,25 @@ class Twitter extends Object {
  * @param string $action action from twitter api
  * @access public
  */
-  	public function connectApp($callback_url, $action='authorize') {
-    	$request = array(
-      		'uri' => array(
-	       	 	'host' => 'api.twitter.com',
-	        	'path' => '/oauth/request_token',
-	      		),
-	      	'method' => 'GET',
-	      	'auth' => array(
-	        	'method' => 'OAuth',
-	        	'oauth_callback' => $callback_url,
-	        	'oauth_consumer_key' => $this->consumer_key,
-	        	'oauth_consumer_secret' => $this->consumer_secret,
-	      		),
-	    	);
-    	$response = $this->Oauth->request($request);
-    	// Redirect user to twitter to authorize application
-    	parse_str($response, $response);
-    	header("Location: http://api.twitter.com/oauth/$action?oauth_token={$response['oauth_token']}");
-    	exit();
+	public function connectApp($callback_url, $action='authorize') {
+		$request = array(
+			'uri' => array(
+				'host' => 'api.twitter.com',
+				'path' => '/oauth/request_token',
+				),
+			'method' => 'GET',
+				'auth' => array(
+				'method' => 'OAuth',
+				'oauth_callback' => $callback_url,
+				'oauth_consumer_key' => $this->consumer_key,
+				'oauth_consumer_secret' => $this->consumer_secret,
+				),
+			);
+		$response = $this->Oauth->request($request);
+		// Redirect user to twitter to authorize application
+		parse_str($response, $response);
+		header("Location: http://api.twitter.com/oauth/$action?oauth_token={$response['oauth_token']}");
+		exit();
 	}
 
 /**
@@ -95,9 +95,9 @@ class Twitter extends Object {
  * @param string $callback_url Url where Twitter should redirect after authentication
  * @access public
  */
-  	public function signIn($callback_url) {
-    	$this->connectApp($callback_url, 'authenticate');
-  	}
+	public function signIn($callback_url) {
+		$this->connectApp($callback_url, 'authenticate');
+	}
 
 /**
  * OAuth token and OAuth token secret (The user vars)
@@ -106,8 +106,8 @@ class Twitter extends Object {
  * @var string $oauth_token The user-specific OAuth token
  * @var string $oauth_token_secret The user-specific OAuth token secret
  */
-  	private $oauth_token, $oauth_token_secret;
-	
+	private $oauth_token, $oauth_token_secret;
+
 
 /**
  * The user authorisation, wich should be called after the user was redirected by Twitter
@@ -123,7 +123,7 @@ class Twitter extends Object {
 			'uri' => array(
 				'host' => 'api.twitter.com',
 				'path' => '/oauth/access_token',
-				 ),
+				),
 			'method' => 'POST',
 			'auth' => array(
 				'method' => 'OAuth',
@@ -136,7 +136,7 @@ class Twitter extends Object {
 		// Get the response
 		$response = $this->Oauth->request($request);
 		parse_str($response, $response);
-		// Setup a new Twitter user		
+		// Setup a new Twitter user
 		$this->loginTwitterUser($response['oauth_token'], $response['oauth_token_secret'], $response['user_id'], $response['screen_name']);
 	}
 
@@ -149,20 +149,20 @@ class Twitter extends Object {
  * @param string $oauth_vertifier The oauth vertifier
  */
 	public function loginTwitterUser($oauthToken, $oauthTokenSecret, $userId = null, $screenName = null) {
- 		if(is_null(CakeSession::read('Twitter.User'))) {
-      		//Update class vars
-	      	$this->oauthToken = $oauthToken;
-	      	$this->oauthTokenSecret = $oauthTokenSecret;
-	      	//Create new session content
-	      	$newSession = array(
-	       		'oauth_token' => $oauthToken,
-	        	'oauth_token_secret' => $oauthTokenSecret,
-	        	'user_id' => $userId,
-	        	'screen_name' => $screenName,
-	      		);
-	      	//Save session
-	      	CakeSession::write('Twitter.User', $newSession);
-    	}
+		if(is_null(CakeSession::read('Twitter.User'))) {
+			//Update class vars
+			$this->oauthToken = $oauthToken;
+			$this->oauthTokenSecret = $oauthTokenSecret;
+			//Create new session content
+			$newSession = array(
+				'oauth_token' => $oauthToken,
+				'oauth_token_secret' => $oauthTokenSecret,
+				'user_id' => $userId,
+				'screen_name' => $screenName,
+				);
+			//Save session
+			CakeSession::write('Twitter.User', $newSession);
+		}
 	}
 
 
@@ -175,9 +175,9 @@ class Twitter extends Object {
  * @param boolean $show_full_profile
  */
 	public function getTwitterUser($show_full_profile = false) {
-    	$userKeys = array();
-	    if($this->userStatus() == false) {
-    		$session = CakeSession::read('Twitter.User');
+		$userKeys = array();
+		if($this->userStatus() == false) {
+			$session = CakeSession::read('Twitter.User');
 			if(!is_null($session)) {
 				$userKeys['oauth_token'] = $session['oauth_token'];
 				$userKeys['oauth_token_secret'] = $session['oauth_token_secret'];
@@ -185,39 +185,39 @@ class Twitter extends Object {
 		} else {
 			$userKeys['oauth_token'] = $this->oauthToken;
 			$userKeys['oauth_token_secret'] = $this->oauthTokenSecret;
-	    }
-    	if($show_full_profile == true) {
+			}
+		if($show_full_profile == true) {
 			$userKeys['profile'] = $this->accountVerifyCredentials();
-		}		
+		}
 		return $userKeys;
 	}
-	
-	
+
+
 /**
  * Logout the current Twitter User (destroy Session `Twitter.User`)
  *
  * @access public
  */
 	public function logoutTwitterUser() {
-	    //Set local keys null
-	    $this->oauthToken = null;
-	    $this->oauthTokenSecret = null;
-	    //Destroy session
-	    if(!is_null(CakeSession::read('Twitter.User'))) CakeSession::delete('Twitter.User');
+		//Set local keys null
+		$this->oauthToken = null;
+		$this->oauthTokenSecret = null;
+		//Destroy session
+		if(!is_null(CakeSession::read('Twitter.User'))) CakeSession::delete('Twitter.User');
 	}
 
 /**
  * Initialize class
  */
 	public function initialize($settings = array()) {
-    	//Open a new OAuthSocket
-	    $this->Oauth = new HttpSocketOauth();
-	    if($this->status() == false) {
+		//Open a new OAuthSocket
+		$this->Oauth = new HttpSocketOauth();
+		if($this->status() == false) {
 			//Check app status
 			if($this->appStatus() == false) {
-		        $consumer_session = CakeSession::read('Twitter.Consumer');
-		        if(!is_null($consumer_session)) {
-        			$this->oauthToken = !empty($consumer_session['oauth_token']) ? $consumer_session['oauth_token'] : null;
+				$consumer_session = CakeSession::read('Twitter.Consumer');
+				if(!is_null($consumer_session)) {
+					$this->oauthToken = !empty($consumer_session['oauth_token']) ? $consumer_session['oauth_token'] : null;
 					$this->oauthTokenSecret = !empty($consumer_session['oauth_token_secret']) ? $consumer_session['oauth_token_secret'] : null;
 				}
 			}
@@ -241,7 +241,7 @@ class Twitter extends Object {
  * @return boolean
  */
 	public function appStatus() {
-    	if($this->consumer_key != '' && $this->consumer_secret != '') {
+		if($this->consumer_key != '' && $this->consumer_secret != '') {
 			return true;
 		}else {
 			return false;
@@ -255,13 +255,13 @@ class Twitter extends Object {
  * @return boolean
  */
 	public function userStatus() {
-    	if($this->appStatus() == true) {
+		if($this->appStatus() == true) {
 			if($this->oauthToken != '' && $this->oauthTokenSecret != '') {
 				return true;
 			} else {
 				return false;
 			}
-	    } else {
+		} else {
 			return false;
 		}
 	}
@@ -273,28 +273,28 @@ class Twitter extends Object {
  * @return boolean
  */
 	public function status() {
-	    if($this->appStatus() == true && $this->userStatus() == true) {
+		if($this->appStatus() == true && $this->userStatus() == true) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-	
+
 /**
  * Return the auth array for the Twitter API methods
  *
  * @access private
  * @return array()
  */
-  	private function authArray() {
-    	return array(
+	private function authArray() {
+		return array(
 			'method' => 'OAuth',
-      		'oauth_token' => $this->oauthToken,
-      		'oauth_token_secret' => $this->oauthTokenSecret,
-      		'oauth_consumer_key' => $this->consumer_key,
-      		'oauth_consumer_secret' => $this->consumer_secret
-   	 		);
-  	}
+			'oauth_token' => $this->oauthToken,
+			'oauth_token_secret' => $this->oauthTokenSecret,
+			'oauth_consumer_key' => $this->consumer_key,
+			'oauth_consumer_secret' => $this->consumer_secret
+			);
+	}
 
 
 //====================Twitter API methods
@@ -310,7 +310,7 @@ class Twitter extends Object {
  * @param array() $body The body of the api request. It has to be an valid array()
  */
 	public function apiRequest($method, $twitterMethodUrl, $body) {
-    	$request = array();
+		$request = array();
 
 		//Method
 		$method = strtoupper($method);
@@ -323,7 +323,7 @@ class Twitter extends Object {
 		}
 		$request['uri'] = array(
 			'host' => 'api.twitter.com',
-		  	'path' => $twitterMethodUrl
+			'path' => $twitterMethodUrl
 			);
 		//Auth
 		$request['auth'] = $this->authArray();
@@ -333,11 +333,11 @@ class Twitter extends Object {
 			//Check if status isset
 			if(array_key_exists('status', $body)) {
 				if(strlen($body['status']) > 140) $body['status'] = substr($body['status'], 0, 137).'...';
-		  	} else if(array_key_exists('text', $body)) {
+			} else if(array_key_exists('text', $body)) {
 				if(strlen($body['text']) > 140) $body['text'] = substr($body['text'], 0, 137).'...';
 			}
-		  	//Set the request body
-		  	$request['body'] = $body;
+			//Set the request body
+			$request['body'] = $body;
 		}
 		//Return
 		return $this->Oauth->request($request);
@@ -355,8 +355,8 @@ class Twitter extends Object {
  * @return array
  */
 	public function accountVerifyCredentials() {
-    	//Request & return
-	    return json_decode($this->apiRequest('get', '/1/account/verify_credentials.json', ''), true);
+		//Request & return
+		return json_decode($this->apiRequest('get', '/1/account/verify_credentials.json', ''), true);
 	}
 
 
@@ -371,9 +371,9 @@ class Twitter extends Object {
  * @return array()
  */
 	public function accountRateLimitStatus() {
-    	//Request & return
-    	return json_decode($this->apiRequest('get', '/1/account/rate_limit_status.json', ''), true);
-  	}
+		//Request & return
+		return json_decode($this->apiRequest('get', '/1/account/rate_limit_status.json', ''), true);
+	}
 
 
 
@@ -388,9 +388,9 @@ class Twitter extends Object {
  * @param int $count The count how many messages should be shown (max. 200)
  * @param int $page Specifies the page of direct messages to retrieve
  */
- 	public function getDirectMessages() {
-    	//Return
-	    return json_decode($this->apiRequest('get', '/1/direct_messages.json', ''), true);
+	public function getDirectMessages() {
+		//Return
+		return json_decode($this->apiRequest('get', '/1/direct_messages.json', ''), true);
 	}
 
 
@@ -401,7 +401,7 @@ class Twitter extends Object {
  * @access public
  * @return array()
  */
- 	public function getDirectMessagesSent() {
+	public function getDirectMessagesSent() {
 		//Return
 		return json_decode($this->apiRequest('get','/1/direct_messages/sent.json', ''), true);
 	}
@@ -418,15 +418,15 @@ class Twitter extends Object {
  * @param text $text The message text. Shouldn't be longer than 140 chars
  */
 	public function newDirectMessage($screen_name, $text) {
-    	//Request body
-	    $body = array();
-	    if($screen_name != '' && $text != '') {
+		//Request body
+		$body = array();
+		if($screen_name != '' && $text != '') {
 			$body['screen_name'] = strtolower($screen_name);
-      		$body['text'] = $text;
-    	}
-    	//Return and request
-    	return json_decode($this->apiRequest('post', '/1/direct_messages/new.json', $body), true);
-  	}
+			$body['text'] = $text;
+		}
+		//Return and request
+		return json_decode($this->apiRequest('post', '/1/direct_messages/new.json', $body), true);
+	}
 
 
 /**
@@ -438,9 +438,9 @@ class Twitter extends Object {
  * @param int $id An unique identifier number of the message.
  */
 	public function destroyDirectMessage($id) {
-    	//Return
-    	return json_decode($this->apiRequest('delete', '/1/direct_messages/destroy/'.$id.'.json', ''), true);
-  	}
+		//Return
+		return json_decode($this->apiRequest('delete', '/1/direct_messages/destroy/' . $id . '.json', ''), true);
+	}
 
 /**
  * Returns all ids of the friends form any user
@@ -449,13 +449,13 @@ class Twitter extends Object {
  * @return array()
  * @param string $screen_name The username
  */
-  	public function getFriendsIds($screen_name) {
-    	//Request-body
-    	$body = array();
-    	$body['screen_name'] = strtolower($screen_name);
-    	//Return and request
-    	return json_decode($this->apiRequest('get', '/1/friends/ids.json', $body), true);
-  	}
+	public function getFriendsIds($screen_name) {
+		//Request-body
+		$body = array();
+		$body['screen_name'] = strtolower($screen_name);
+		//Return and request
+		return json_decode($this->apiRequest('get', '/1/friends/ids.json', $body), true);
+	}
 
 /**
  * Returns all ids of the followers from any user
@@ -464,13 +464,13 @@ class Twitter extends Object {
  * @return array()
  * @param string $screen_name The usernam
  */
-  	public function getFollowersIds($screen_name) {
-    	//Request-body
-    	$body = array();
-    	$body['screen_name'] = strtolower($screen_name);
-    	//Return and request
-    	return json_decode($this->apiRequest('get', '/1/followers/ids.json', $body), true);
-  	}
+	public function getFollowersIds($screen_name) {
+		//Request-body
+		$body = array();
+		$body['screen_name'] = strtolower($screen_name);
+		//Return and request
+		return json_decode($this->apiRequest('get', '/1/followers/ids.json', $body), true);
+	}
 
 
 /**
@@ -484,16 +484,16 @@ class Twitter extends Object {
  * @param string $screen_name The uername of the user to be followed
  */
 	public function createFriendship($screen_name) {
-    	//Check if $screen_name is string or int (ID)
-    	if(!is_numeric($screen_name)) {
-      		//Request-body
-      		$body = array();
-      		$body['screen_name'] = strtolower($screen_name);
-      		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/friendships/create.json', $body), true);
-    	}
-  	}
-  
+		//Check if $screen_name is string or int (ID)
+		if(!is_numeric($screen_name)) {
+			//Request-body
+			$body = array();
+			$body['screen_name'] = strtolower($screen_name);
+			//Return and request
+			return json_decode($this->apiRequest('post', '/1/friendships/create.json', $body), true);
+		}
+	}
+
 /**
  * Look at createFriendship()
  *
@@ -502,14 +502,14 @@ class Twitter extends Object {
  * @param int $id The unique identifier of the user
  */
 	public function createFriendshipById($id) {
-    	if(is_numeric($id)) {
-      		//Request-body
-      		$body = array();
-      		$body['user_id'] = $id;
-      		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/friendships/create.json', $body), true);
-    	}
-  	}
+		if(is_numeric($id)) {
+			//Request-body
+			$body = array();
+			$body['user_id'] = $id;
+			//Return and request
+			return json_decode($this->apiRequest('post', '/1/friendships/create.json', $body), true);
+		}
+	}
 
 
 /**
@@ -522,15 +522,15 @@ class Twitter extends Object {
  * @param string $screen_name The username of the user to unfollow
  */
 	public function destroyFriendship($screen_name) {
-    	//Request-body
-    	if(!is_numeric($screen_name)) {
-      		$body = array();
-      		$body['screen_name'] = strtolower($screen_name);
-      		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/friendships/destroy.json', $body), true);
-    	}
-  	}
-  
+		//Request-body
+		if(!is_numeric($screen_name)) {
+			$body = array();
+			$body['screen_name'] = strtolower($screen_name);
+			//Return and request
+			return json_decode($this->apiRequest('post', '/1/friendships/destroy.json', $body), true);
+		}
+	}
+
 
 /**
  * Look at destoryFriendship()
@@ -539,14 +539,14 @@ class Twitter extends Object {
  * @return array()
  * @param int $id The unique identifier of the user to unfollow
  */
-  	public function destroyFriendshipById($id) {
-    	if(is_numeric($id)) {
-      		$body = array();
-      		$body['user_id'] = $id;
-      		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/friendships/destroy.json', $body), true);
-    	}
-  	}
+	public function destroyFriendshipById($id) {
+		if(is_numeric($id)) {
+			$body = array();
+			$body['user_id'] = $id;
+			//Return and request
+			return json_decode($this->apiRequest('post', '/1/friendships/destroy.json', $body), true);
+		}
+	}
 
 
 /**
@@ -559,13 +559,13 @@ class Twitter extends Object {
  * @param string $user_b Screen name of user b
  */
 	public function friendshipExists($user_a, $user_b) {
-    	//Request-body
-    	$body = array();
-    	$body['user_a'] = $user_a;
-    	$body['user_b'] = $user_b;
-    	//Return and request
-    	return json_decode($this->apiRequest('get', '/1/friendships/exists.json', $body), true);
-  	}
+		//Request-body
+		$body = array();
+		$body['user_a'] = $user_a;
+		$body['user_b'] = $user_b;
+		//Return and request
+		return json_decode($this->apiRequest('get', '/1/friendships/exists.json', $body), true);
+	}
 
 
 /**
@@ -577,11 +577,11 @@ class Twitter extends Object {
  * @param int $id The id of the tweet
  */
 	public function showStatus($id) {
-    	if(is_numeric($id)) {
-      	//Return and request
-      		return json_decode($this->apiRequest('get', '/1/statuses/show/'.$id.'.json', ''), true);
-    	}
-  	}
+		if(is_numeric($id)) {
+		//Return and request
+			return json_decode($this->apiRequest('get', '/1/statuses/show/' . $id . '.json', ''), true);
+		}
+	}
 
 /**
  * Updates the authenticating user's status.
@@ -594,15 +594,15 @@ class Twitter extends Object {
  * @param string $status The text wich should be posted as new status
  */
 	public function updateStatus($status) {
-    	if($status != null || $status != '') {
-      		//Request-body
-      		$body = array(
-        		'status' => $status
-      			);
-      		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/statuses/update.json', $body), true);
-    	}
-  	}
+		if($status != null || $status != '') {
+			//Request-body
+			$body = array(
+				'status' => $status
+				);
+			//Return and request
+			return json_decode($this->apiRequest('post', '/1/statuses/update.json', $body), true);
+		}
+	}
 
 /**
  * Destroys the status specified by the required ID parameter.
@@ -612,12 +612,12 @@ class Twitter extends Object {
  * @return array()
  * @param int $id The ID of the status wich should be destroyed
  */
- 	public function destroyStatus($id) {
-    	if(is_numeric($id)) {
-      		//Return and request
-      		return json_decode($this->apiRequest('post', '/1/statuses/destroy/'.$id.'.json', ''), true);
-    	}
-  	}
+	public function destroyStatus($id) {
+		if(is_numeric($id)) {
+			//Return and request
+			return json_decode($this->apiRequest('post', '/1/statuses/destroy/' . $id . '.json', ''), true);
+		}
+	}
 
 
 /**
@@ -628,10 +628,10 @@ class Twitter extends Object {
  * @access public
  * @return array()
  */
- 	public function publicTimeline() {
-    	//Request & Return
-    	return json_decode($this->apiRequest('get', '/1/statuses/public_timeline.json', ''), true);
-  	}
+	public function publicTimeline() {
+		//Request & Return
+		return json_decode($this->apiRequest('get', '/1/statuses/public_timeline.json', ''), true);
+	}
 
 
 /**
@@ -641,10 +641,10 @@ class Twitter extends Object {
  * @access public
  * @return array()
  */
-  	public function friendsTimeline() {
-    	//Return and request
-	  	return json_decode($this->apiRequest('get', '/1/statuses/friends_timeline.json', ''), true);
-  	}
+	public function friendsTimeline() {
+		//Return and request
+		return json_decode($this->apiRequest('get', '/1/statuses/friends_timeline.json', ''), true);
+	}
 
 /**
  * Returns the 20 most recent statuses, including retweets, posted by the authenticating
@@ -653,7 +653,7 @@ class Twitter extends Object {
  * @access public
  * @return array()
  */
- 	public function homeTimeline() {
+	public function homeTimeline() {
 		//Return and request
 		return json_decode($this->apiRequest('get', '/1/statuses/home_timeline.json', ''), true);
 	}
@@ -669,10 +669,10 @@ class Twitter extends Object {
  * @param int || string $param The ID or screen name of the user
  */
 	public function userTimeline($param = null) {
-    	// Request-body
-    	$body = array();
-    	// Check if $param is numeric
-    	if(is_numeric($param)) {
+		// Request-body
+		$body = array();
+		// Check if $param is numeric
+		if(is_numeric($param)) {
 			$body['user_id'] = $param;
 		} else if(!is_numeric($param)) {
 			$body['screen_name'] = strtolower($param);
@@ -692,10 +692,10 @@ class Twitter extends Object {
  * @access public
  * @return array()
  */
-  	public function mentionsTimeline() {
-    	//Return and request
-    	return json_decode($this->apiRequest('get', '/1/statuses/mentions.json', ''), true);
-  	}
+	public function mentionsTimeline() {
+		//Return and request
+		return json_decode($this->apiRequest('get', '/1/statuses/mentions.json', ''), true);
+	}
 
 
 /**
@@ -706,11 +706,11 @@ class Twitter extends Object {
  * @return array()
  * @param int || string $param The ID or screen name of the user
  */
-  	public function showUser($param) {
-    	//Request-body
-    	$body = array();
-    	//Check if $param is numeric
-    	if(is_numeric($param)) {
+	public function showUser($param) {
+		//Request-body
+		$body = array();
+		//Check if $param is numeric
+		if(is_numeric($param)) {
 			$body['user_id'] = $param;
 		} else {
 			$body['screen_name'] = strtolower($param);
