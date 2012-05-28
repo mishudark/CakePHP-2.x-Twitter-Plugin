@@ -719,13 +719,16 @@ class Twitter extends Object {
 		//Request-body
 		$body = array();
 		//Check if $param is numeric
+		$url = '/1/users/show.json';
 		if (is_numeric($param)) {
 			$body['user_id'] = $param;
+			$url .= '?user_id=' . $param;
 		} else {
 			$body['screen_name'] = strtolower($param);
+			$url .= '?screen_name=' . urlencode($param);
 		}
 		//Return and request
-		return json_decode($this->apiRequest('get', '/1/users/show.json', $body), true);
+		return json_decode($this->apiRequest('get', $url, $body), true);
 	}
 
 }
