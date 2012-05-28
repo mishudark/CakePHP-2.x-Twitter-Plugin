@@ -137,7 +137,12 @@ class Twitter extends Object {
 		$response = $this->Oauth->request($request);
 		parse_str($response, $response);
 		// Setup a new Twitter user
-		$this->loginTwitterUser($response['oauth_token'], $response['oauth_token_secret'], $response['user_id'], $response['screen_name']);
+		if (isset($response['user_id'])) {
+			$this->loginTwitterUser($response['oauth_token'], $response['oauth_token_secret'], $response['user_id'], $response['screen_name']);
+		} else {
+			$this->log('missing user_id in response');
+			return false;
+		}
 	}
 
 /**
