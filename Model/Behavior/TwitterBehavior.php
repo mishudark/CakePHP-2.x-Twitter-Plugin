@@ -162,6 +162,10 @@ class TwitterBehavior extends ModelBehavior {
 		return $this->_Twitter->setupApp($consumerKey, $consumerSecret);
 	}
 
+	public function signIn($Model, $callbackUrl) {
+		return $this->_Twitter->signIn($callbackUrl);
+	}
+
 	public function logoutTwitterUser($Model) {
 		return $this->_Twitter->logoutTwitterUser();
 	}
