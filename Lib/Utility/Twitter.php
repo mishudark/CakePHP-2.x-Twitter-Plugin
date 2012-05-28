@@ -115,9 +115,9 @@ class Twitter extends Object {
  *
  * @access public
  * @param string $oauth_token The token send back by Twitter to the callback url,
- * @param string $$oauth_vertifier: The vertifier send back by Twitter to the callback url
+ * @param string $$oauth_verifier: The verifier send back by Twitter to the callback url
  */
-	public function authorizeTwitterUser($oauth_token, $oauth_vertifier) {
+	public function authorizeTwitterUser($oauth_token, $oauth_verifier) {
 		//Build request
 		$request = array(
 			'uri' => array(
@@ -130,7 +130,7 @@ class Twitter extends Object {
 				'oauth_consumer_key' => $this->consumer_key,
 				'oauth_consumer_secret' => $this->consumer_secret,
 				'oauth_token' => $oauth_token,
-				'oauth_verifier' => $oauth_vertifier,
+				'oauth_verifier' => $oauth_verifier,
 				),
 			);
 		// Get the response
@@ -146,7 +146,7 @@ class Twitter extends Object {
  *
  * @access public
  * @param string $oauth_secret The oauth secret
- * @param string $oauth_vertifier The oauth vertifier
+ * @param string $oauth_verifier The oauth verifier
  */
 	public function loginTwitterUser($oauthToken, $oauthTokenSecret, $userId = null, $screenName = null) {
 		if (is_null(CakeSession::read('Twitter.User'))) {

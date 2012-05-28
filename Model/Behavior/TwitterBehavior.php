@@ -156,7 +156,7 @@ class TwitterBehavior extends ModelBehavior {
 	}
 
 	public function showUser($Model, $param) {
-		return $this->_Twitter->showUser($parm);
+		return $this->_Twitter->showUser($param);
 	}
 
 	public function setupApp($Model, $consumerKey, $consumerSecret) {
