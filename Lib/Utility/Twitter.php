@@ -27,7 +27,7 @@ class Twitter extends Object {
  * @var string $consumer_key The OAuth consumer key
  * @var string $consumer_secret The OAuth consumer secret
  */
-	private $consumer_key, $consumer_secret;
+	private $consumer_key, $consumer_secret, $oauthToken, $oauthSecret;
 
 /**
  * The OAuthConfig Class and class var
@@ -37,6 +37,10 @@ class Twitter extends Object {
  */
 	private $Oauth;
 
+	public function __construct($settings = array()) {
+		parent::__construct();
+		$this->initialize($settings);
+	}
 
 /**
  * Setup the counsumer key and consumer secret for the app.

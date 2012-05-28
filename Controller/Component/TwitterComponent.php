@@ -44,8 +44,7 @@ class TwitterComponent extends Component {
  */
 	public function initialize(Controller $controller, $settings = array()) {
 		$this->_controller = $controller;
-		$this->_Twitter = new Twitter();
-		$this->_Twitter->initialize($settings);
+		$this->_Twitter = new Twitter($settings);
 	}
 
 }

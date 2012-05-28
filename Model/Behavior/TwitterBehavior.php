@@ -37,8 +37,7 @@ class TwitterBehavior extends ModelBehavior {
 */
 	public function setup(Model $Model, $settings = array()) {
 		$this->_Model = $Model;
-		$this->_Twitter = new Twitter();
-		$this->_Twitter->initialize($settings);
+		$this->_Twitter = new Twitter($settings);
 	}
 
 /*--- Begin Proxy methods for Utility/Twitter ---*/
