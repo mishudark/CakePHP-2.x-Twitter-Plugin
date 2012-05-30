@@ -66,6 +66,18 @@ class Twitter extends Object {
 	}
 
 /**
+ * Setup the oauth token and oauth token secret for the instance.
+ *
+ * @access public
+ * @param string $consumer_key OAuth consumer key of the Twitter app
+ * @param string $consumer_secret OAuth consumer secret of the Twitter app
+ */
+	public function setToken($token = null, $token_secret = null) {
+		$this->oauthToken = $token;
+		$this->oauthTokenSecret = $token_secret;;
+	}
+
+/**
  * Connect app to twitter and let it authorize through the user.
  *
  * @param string $callback_url Url where Twitter should redirect after authorisation
