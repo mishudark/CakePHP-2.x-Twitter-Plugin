@@ -40,6 +40,8 @@ class Twitter extends Object {
 	public function __construct($settings = array()) {
 		parent::__construct();
 		$this->initialize($settings);
+		$this->consumer_key = Configure::read('Twitter.consumerKey');
+		$this->consumer_secret = Configure::read('Twitter.consumerSecret');
 	}
 
 /**
