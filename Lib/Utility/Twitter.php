@@ -616,12 +616,13 @@ class Twitter extends Object {
  * @return array()
  * @param string $status The text wich should be posted as new status
  */
-	public function updateStatus($status) {
+	public function updateStatus($status, $options = array()) {
 		if ($status != null || $status != '') {
 			//Request-body
-			$body = array(
+			$body = Set::merge(array(
 				'status' => $status
-				);
+				), $options);
+
 			//Return and request
 			return json_decode($this->apiRequest('post', '/1/statuses/update.json', $body), true);
 		}
