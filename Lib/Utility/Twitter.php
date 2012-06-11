@@ -746,4 +746,45 @@ class Twitter extends Object {
 		return json_decode($this->apiRequest('get', $url, $body), true);
 	}
 
+/**
+ * Lookup users
+ *
+ * https://dev.twitter.com/docs/api/1/get/users/lookup
+ *
+ * $options:
+ *   `user_id` string|array optional
+ *   `screen_name` string|array optional
+ */
+	public function lookupUsers($options) {
+		$body = array();
+		$url = '/1/users/lookup.json';
+		if (!isset($options['screen_name']) && !isset($options['user_id'])) {
+			return false;
+		}
+
+		if (isset($options['screen_name'])) {
+			if (is_array($options['screen_name'])) {
+				$screenNames = join(',', $options['screen_name']);
+			} else {
+				$screenNames = $options['screen_name'];
+			}
+		}
+
+		if (isset($options['user_id'])) {
+			if (is_array($options['user_id'])) {
+				$userIds = join(',', $options['user_id']);
+			} else {
+				$userIds = $options['user_id'];
+			}
+		}
+
+		if (isset($userIds)) {
+			$body['user_id'] = $userIds;
+		} elseif (isset($screenNames)) {
+			$body['screen_name'] = $screenNames;
+		}
+
+		return json_decode($this->apiRequest('get', $url, $body), true);
+	}
+
 }
