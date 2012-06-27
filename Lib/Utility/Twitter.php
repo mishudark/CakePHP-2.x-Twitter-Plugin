@@ -655,6 +655,19 @@ class Twitter extends Object {
 		}
 	}
 
+/**
+ * Retweet
+ *
+ * @link https://dev.twitter.com/docs/api/1/post/statuses/retweet/%3Aid
+ * @access public
+ * @return array()
+ * @param string $status The text wich should be posted as new status
+ */
+	public function retweetStatus($id) {
+		if ($id) {
+			return json_decode($this->apiRequest('post', '/1/statuses/retweet/' . $id . '.json', ''), true);
+		}
+	}
 
 /**
  * Returns the 20 most recent statuses from non-protected users

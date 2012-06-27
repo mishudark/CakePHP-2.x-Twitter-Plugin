@@ -138,6 +138,10 @@ class TwitterBehavior extends ModelBehavior {
 		return $this->_Twitter->destroyStatus($id);
 	}
 
+	public function retweetStatus($Model, $status) {
+		return $this->_Twitter->retweetStatus($status);
+	}
+
 	public function publicTimeline($Model) {
 		return $this->_Twitter->publicTimeline();
 	}
