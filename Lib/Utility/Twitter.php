@@ -466,6 +466,18 @@ class Twitter extends Object {
 	}
 
 /**
+ * Add Favorite
+ *
+ * @link https://dev.twitter.com/docs/api/1/post/favorites/create/%3Aid
+ * @access public
+ * @return array()
+ */
+	public function newFavorite($id) {
+		//Return and request
+		return json_decode($this->apiRequest('post', '/1/favorites/create/' . $id . '.json', ''), true);
+	}
+
+/**
  * Returns all ids of the friends form any user
  *
  * @access public

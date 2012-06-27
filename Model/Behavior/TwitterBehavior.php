@@ -94,6 +94,10 @@ class TwitterBehavior extends ModelBehavior {
 		return $this->_Twitter->destroyDirectMessage($id);
 	}
 
+	public function newFavorite($Model, $id) {
+		return $this->_Twitter->newFavorite($id);
+	}
+
 	public function getFriendsIds($Model, $screenName) {
 		return $this->_Twitter->getFriendsIds($screenName);
 	}
