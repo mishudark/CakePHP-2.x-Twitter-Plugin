@@ -174,6 +174,10 @@ class TwitterBehavior extends ModelBehavior {
 		return $this->_Twitter->logoutTwitterUser();
 	}
 
+	public function relatedResults($Model, $tweetId) {
+		return $this->_Twitter->relatedResults($tweetId);
+	}
+
 /*--- End Proxy methods for Utility/Twitter ---*/
 
 }

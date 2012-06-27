@@ -721,6 +721,17 @@ class Twitter extends Object {
 		return json_decode($this->apiRequest('get', '/1/statuses/mentions.json', ''), true);
 	}
 
+/**
+ * Returns related results (to see conversation)
+ * Note: This is undocumented/unsupported Twitter API
+ *
+ * @link https://dev.twitter.com/discussions/293
+ * @link https://groups.google.com/d/msg/twitter-development-talk/zcNK54ojULg/rqmau1XD4HYJ
+ */
+	public function relatedResults($id) {
+		$url = '/1/related_results/show/' . $id . '.json';
+		return json_decode($this->apiRequest('get', $url, ''), true);
+	}
 
 /**
  * Returns extended information of a given user, specified by ID or screen name
