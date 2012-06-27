@@ -703,8 +703,8 @@ class Twitter extends Object {
  * @return array()
  */
 	public function homeTimeline() {
-		//Return and request
-		return json_decode($this->apiRequest('get', '/1/statuses/home_timeline.json', ''), true);
+		$body = 'include_rts=1';
+		return json_decode($this->apiRequest('get', '/1/statuses/home_timeline.json', $body), true);
 	}
 
 /**
