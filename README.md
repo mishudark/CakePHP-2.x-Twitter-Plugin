@@ -34,9 +34,6 @@ NOTE: This plugin does not support the "Twitter for Websites" Features (https://
 * CakePHP Version: 2.0 Stable
 * A Twitter (API) app (Registration: https://dev.twitter.com/apps/new)
 
-### Issues 
-
-https://github.com/zuha/twitter-cakephp-plugin/issues
 
 
 ### Additional Links From Original Fork:
