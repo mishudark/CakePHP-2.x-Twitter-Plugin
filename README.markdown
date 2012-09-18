@@ -1,6 +1,9 @@
 asdasdasd as 
 ##asdasd conflicto
 
+asdasdsd
+asds
+
 This is a plugin for CakePHP to connect your app with the Twitter API using OAuth.
 With this plugin it's possible to access the main API methods (such as status updates, timelines or user) of the Twitter API in all of your controllers. You even have the opportunity to make custom API-Calls with this plugin.
 The plugin uses 'http_socket_oauth' (https://github.com/neilcrookes/http_socket_oauth) by Neil Crookes <www.neilcrookes.com> as extension for the CakePHP 'HttpSocket'. 
