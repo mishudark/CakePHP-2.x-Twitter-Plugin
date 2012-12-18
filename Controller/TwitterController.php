@@ -71,7 +71,7 @@ class TwitterController extends AppController {
 		CakeSession::delete('Twitter.User');
 		if (!empty($this->consumerKey) && !empty($this->consumerSecret)) {
 			$this->Twitter->setupApp($this->consumerKey, $this->consumerSecret); 
-			$this->Twitter->connectApp('http://'.$_SERVER['HTTP_HOST'].'/twitter/twitter/authorization');
+			$this->Twitter->connectApp(Router::url(array('action' => 'authorization'), true));
 		} else {
 			echo 'App key and secret key are not set';
 			break;
