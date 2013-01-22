@@ -27,7 +27,7 @@ class Twitter extends Object {
  * @var string $consumer_key The OAuth consumer key
  * @var string $consumer_secret The OAuth consumer secret
  */
-	private $consumer_key, $consumer_secret, $oauthToken, $oauthSecret;
+	private $consumer_key, $consumer_secret, $oauthToken, $oauthTokenSecret;
 
 /**
  * The OAuthConfig Class and class var
