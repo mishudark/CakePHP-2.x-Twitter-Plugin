@@ -50,11 +50,52 @@ class Twitter extends Object {
  */
 	protected $_Oauth;
 
+	protected $_endPoints = array(
+		'1' => array(
+			'account/verify_credentials',
+			'account/rate_limit_status',
+			'direct_messages',
+			'direct_messages/sent',
+			'direct_messages/new',
+			'direct_messages/destroy',
+			'favorites/create',
+			'friends/ids',
+			'followers/ids',
+			'friendships/create',
+			'friendships/destroy',
+			'friendships/exists',
+			'statuses/show',
+			'statuses/public_timeline',
+			'statuses/friends_timeline',
+			'statuses/home_timeline',
+			'statuses/user_timeline',
+			'statuses/mentions',
+			'related_results/show',
+			'users/show',
+			'users/lookup',
+		),
+	);
+
+	protected $_defaultApiVersion = '1';
+
 	public function __construct($settings = array()) {
 		parent::__construct();
 		$this->initialize($settings);
 		$this->_consumerKey = Configure::read('Twitter.consumerKey');
 		$this->_consumerSecret = Configure::read('Twitter.consumerSecret');
+	}
+
+/**
+ * @param string $endPoint
+ */
+	public function endPoint($endPoint, $apiVersion = '1', $ext = 'json') {
+		if (!in_array($endPoint, $this->_endPoints[$apiVersion])) {
+			throw new CakeException(__('Invalid Endpoint: %s', $endPoint));
+		}
+		if ($ext) {
+			$endPoint .= '.' . $ext;
+		}
+		return $apiVersion . '/' . $endPoint;
 	}
 
 /**
@@ -364,7 +405,7 @@ class Twitter extends Object {
  * @return array
  */
 	public function accountVerifyCredentials() {
-		return json_decode($this->apiRequest('get', '/1/account/verify_credentials.json', ''), true);
+		return json_decode($this->apiRequest('get', $this->endPoint('account/verify_credentials'), ''), true);
 	}
 
 /**
@@ -378,7 +419,7 @@ class Twitter extends Object {
  * @return array()
  */
 	public function accountRateLimitStatus() {
-		return json_decode($this->apiRequest('get', '/1/account/rate_limit_status.json', ''), true);
+		return json_decode($this->apiRequest('get', $this->endPoint('account/rate_limit_status'), ''), true);
 	}
 
 /**
@@ -393,7 +434,7 @@ class Twitter extends Object {
  * @param int $page Specifies the page of direct messages to retrieve
  */
 	public function getDirectMessages() {
-		return json_decode($this->apiRequest('get', '/1/direct_messages.json', ''), true);
+		return json_decode($this->apiRequest('get', $this->endPoint('direct_messages'), ''), true);
 	}
 
 /**
@@ -404,7 +445,7 @@ class Twitter extends Object {
  * @return array()
  */
 	public function getDirectMessagesSent() {
-		return json_decode($this->apiRequest('get','/1/direct_messages/sent.json', ''), true);
+		return json_decode($this->apiRequest('get', $this->endPoint('direct_messages/sent'), ''), true);
 	}
 
 /**
@@ -424,7 +465,7 @@ class Twitter extends Object {
 			$body['screen_name'] = strtolower($screenName);
 			$body['text'] = $text;
 		}
-		return json_decode($this->apiRequest('post', '/1/direct_messages/new.json', $body), true);
+		return json_decode($this->apiRequest('post', $this->endPoint('direct_messages/new'), $body), true);
 	}
 
 /**
@@ -436,7 +477,7 @@ class Twitter extends Object {
  * @param int $id An unique identifier number of the message.
  */
 	public function destroyDirectMessage($id) {
-		return json_decode($this->apiRequest('delete', '/1/direct_messages/destroy/' . $id . '.json', ''), true);
+		return json_decode($this->apiRequest('delete', $this->endPoint('direct_messages/destroy', $this->_defaultApiVersion, false) . '/' . $id . '.json', ''), true);
 	}
 
 /**
@@ -447,7 +488,7 @@ class Twitter extends Object {
  * @return array()
  */
 	public function newFavorite($id) {
-		return json_decode($this->apiRequest('post', '/1/favorites/create/' . $id . '.json', ''), true);
+		return json_decode($this->apiRequest('post', $this->endPoint('favorites/create', $this->_defaultApiVersion, false) . $id . '.json', ''), true);
 	}
 
 /**
@@ -460,7 +501,7 @@ class Twitter extends Object {
 	public function getFriendsIds($screenName) {
 		$body = array();
 		$body['screen_name'] = strtolower($screenName);
-		return json_decode($this->apiRequest('get', '/1/friends/ids.json', $body), true);
+		return json_decode($this->apiRequest('get', $this->endPoint('friends/ids'), $body), true);
 	}
 
 /**
@@ -473,7 +514,7 @@ class Twitter extends Object {
 	public function getFollowersIds($screenName) {
 		$body = array();
 		$body['screen_name'] = strtolower($screenName);
-		return json_decode($this->apiRequest('get', '/1/followers/ids.json', $body), true);
+		return json_decode($this->apiRequest('get', $this->endPoint('followers/ids'), $body), true);
 	}
 
 /**
@@ -490,7 +531,7 @@ class Twitter extends Object {
 		if (!is_numeric($screenName)) {
 			$body = array();
 			$body['screen_name'] = strtolower($screenName);
-			return json_decode($this->apiRequest('post', '/1/friendships/create.json', $body), true);
+			return json_decode($this->apiRequest('post', $this->endPoint('friendships/create'), $body), true);
 		}
 	}
 
@@ -505,7 +546,7 @@ class Twitter extends Object {
 		if (is_numeric($id)) {
 			$body = array();
 			$body['user_id'] = $id;
-			return json_decode($this->apiRequest('post', '/1/friendships/create.json', $body), true);
+			return json_decode($this->apiRequest('post', $this->endPoint('friendships/create'), $body), true);
 		}
 	}
 
@@ -522,7 +563,7 @@ class Twitter extends Object {
 		if (!is_numeric($screenName)) {
 			$body = array();
 			$body['screen_name'] = strtolower($screenName);
-			return json_decode($this->apiRequest('post', '/1/friendships/destroy.json', $body), true);
+			return json_decode($this->apiRequest('post', $this->endPoint('friendships/destroy'), $body), true);
 		}
 	}
 
@@ -537,7 +578,7 @@ class Twitter extends Object {
 		if (is_numeric($id)) {
 			$body = array();
 			$body['user_id'] = $id;
-			return json_decode($this->apiRequest('post', '/1/friendships/destroy.json', $body), true);
+			return json_decode($this->apiRequest('post', $this->endPoint('friendships/destroy'), $body), true);
 		}
 	}
 
@@ -554,7 +595,7 @@ class Twitter extends Object {
 		$body = array();
 		$body['user_a'] = $userA;
 		$body['user_b'] = $userB;
-		return json_decode($this->apiRequest('get', '/1/friendships/exists.json', $body), true);
+		return json_decode($this->apiRequest('get', $this->endPoint('friendships/exists'), $body), true);
 	}
 
 /**
@@ -567,7 +608,7 @@ class Twitter extends Object {
  */
 	public function showStatus($id) {
 		if (is_numeric($id)) {
-			return json_decode($this->apiRequest('get', '/1/statuses/show/' . $id . '.json', ''), true);
+			return json_decode($this->apiRequest('get', $this->endPoint('statuses/show', $this->_defaultApiVersion, false) . '/' . $id . '.json', ''), true);
 		}
 	}
 
@@ -628,7 +669,7 @@ class Twitter extends Object {
  * @return array()
  */
 	public function publicTimeline() {
-		return json_decode($this->apiRequest('get', '/1/statuses/public_timeline.json', ''), true);
+		return json_decode($this->apiRequest('get', $this->endPoint('statuses/public_timeline'), ''), true);
 	}
 
 /**
@@ -639,7 +680,7 @@ class Twitter extends Object {
  * @return array()
  */
 	public function friendsTimeline() {
-		return json_decode($this->apiRequest('get', '/1/statuses/friends_timeline.json', ''), true);
+		return json_decode($this->apiRequest('get', $this->endPoint('statuses/friends_timeline'), ''), true);
 	}
 
 /**
@@ -650,8 +691,8 @@ class Twitter extends Object {
  * @return array()
  */
 	public function homeTimeline() {
-		$body = 'include_rts=1';
-		return json_decode($this->apiRequest('get', '/1/statuses/home_timeline.json', $body), true);
+		$body = array('include_rts' => true);
+		return json_decode($this->apiRequest('get', $this->endPoint('statuses/home_timeline'), $body), true);
 	}
 
 /**
@@ -674,7 +715,7 @@ class Twitter extends Object {
 			// Return homeTimeline if $param is null
 			return $this->homeTimeline();
 		}
-		return json_decode($this->apiRequest('get', '/1/statuses/user_timeline.json', $body), true);
+		return json_decode($this->apiRequest('get', $this->endPoint('statuses/user_timeline'), $body), true);
 	}
 
 /**
@@ -685,7 +726,7 @@ class Twitter extends Object {
  * @return array()
  */
 	public function mentionsTimeline() {
-		return json_decode($this->apiRequest('get', '/1/statuses/mentions.json', ''), true);
+		return json_decode($this->apiRequest('get', $this->endPoint('statuses/mentions'), ''), true);
 	}
 
 /**
@@ -696,7 +737,7 @@ class Twitter extends Object {
  * @link https://groups.google.com/d/msg/twitter-development-talk/zcNK54ojULg/rqmau1XD4HYJ
  */
 	public function relatedResults($id) {
-		$url = '/1/related_results/show/' . $id . '.json';
+		$url = $this->endPoint('related_results/show', $this->_defaultApiVersion, false) . '/' . $id . '.json';
 		return json_decode($this->apiRequest('get', $url, ''), true);
 	}
 
@@ -710,7 +751,7 @@ class Twitter extends Object {
  */
 	public function showUser($param) {
 		$body = array();
-		$url = '/1/users/show.json';
+		$url = $this->endPoint('users/show');
 		if (is_numeric($param)) {
 			$body['user_id'] = $param;
 			$url .= '?user_id=' . $param;
@@ -732,7 +773,7 @@ class Twitter extends Object {
  */
 	public function lookupUsers($options) {
 		$body = array();
-		$url = '/1/users/lookup.json';
+		$url = $this->endPoint('/users/lookup');
 		if (!isset($options['screen_name']) && !isset($options['user_id'])) {
 			return false;
 		}
