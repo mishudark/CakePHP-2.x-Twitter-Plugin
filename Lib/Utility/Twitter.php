@@ -754,10 +754,8 @@ class Twitter extends Object {
 		$url = $this->endPoint('users/show');
 		if (is_numeric($param)) {
 			$body['user_id'] = $param;
-			$url .= '?user_id=' . $param;
 		} else {
 			$body['screen_name'] = strtolower($param);
-			$url .= '?screen_name=' . urlencode($param);
 		}
 		return json_decode($this->apiRequest('get', $url, $body), true);
 	}
