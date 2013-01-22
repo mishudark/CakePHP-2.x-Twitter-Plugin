@@ -360,7 +360,11 @@ class Twitter extends Object {
 				if (strlen($body['text']) > 140) $body['text'] = substr($body['text'], 0, 137).'...';
 			}
 			//Set the request body
-			$request['body'] = $body;
+			if ($method == 'GET') {
+				$request['uri']['query'] = $body;
+			} else {
+				$request['body'] = $body;
+			}
 		}
 		//Return
 		return $this->Oauth->request($request);
