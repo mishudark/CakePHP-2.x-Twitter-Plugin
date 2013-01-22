@@ -357,9 +357,9 @@ class Twitter extends Object {
  * @param string $method The request method (post, delete, get, put)
  * @param string $twitterMethodUrl The url of the API method (without 'api.twitter.com'),
  * e.g. /1/trends.json
- * @param array() $body The body of the api request. It has to be an valid array()
+ * @param array() $params The body of the api request. It has to be an valid array()
  */
-	public function apiRequest($method, $twitterMethodUrl, $body) {
+	public function apiRequest($method, $twitterMethodUrl, $params) {
 		$request = array();
 
 		$method = strtoupper($method);
@@ -377,17 +377,17 @@ class Twitter extends Object {
 
 		$request['auth'] = $this->_authArray();
 
-		if (is_array($body)) {
-			$body = array_change_key_case($body);
-			if (array_key_exists('status', $body)) {
-				if (strlen($body['status']) > 140) $body['status'] = substr($body['status'], 0, 137) . '...';
-			} else if (array_key_exists('text', $body)) {
-				if (strlen($body['text']) > 140) $body['text'] = substr($body['text'], 0, 137) . '...';
+		if (is_array($params)) {
+			$params = array_change_key_case($params);
+			if (array_key_exists('status', $params)) {
+				if (strlen($params['status']) > 140) $params['status'] = substr($params['status'], 0, 137) . '...';
+			} else if (array_key_exists('text', $params)) {
+				if (strlen($params['text']) > 140) $params['text'] = substr($params['text'], 0, 137) . '...';
 			}
 			if ($method == 'GET') {
-				$request['uri']['query'] = $body;
+				$request['uri']['query'] = $params;
 			} else {
-				$request['body'] = $body;
+				$request['params'] = $params;
 			}
 		}
 		return $this->_Oauth->request($request);
