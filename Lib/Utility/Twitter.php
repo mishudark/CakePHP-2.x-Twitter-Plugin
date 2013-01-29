@@ -387,7 +387,7 @@ class Twitter extends Object {
 			if ($method == 'GET') {
 				$request['uri']['query'] = $params;
 			} else {
-				$request['params'] = $params;
+				$request['body'] = $params;
 			}
 		}
 		return $this->_Oauth->request($request);
@@ -771,7 +771,7 @@ class Twitter extends Object {
  */
 	public function lookupUsers($options) {
 		$body = array();
-		$url = $this->endPoint('/users/lookup');
+		$url = $this->endPoint('users/lookup');
 		if (!isset($options['screen_name']) && !isset($options['user_id'])) {
 			return false;
 		}
