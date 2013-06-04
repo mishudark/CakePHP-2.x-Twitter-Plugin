@@ -74,7 +74,7 @@ class Twitter extends Object {
 			'users/show',
 			'users/lookup',
 		),
-		'1.1' = array(
+		'1.1' => array(
 			'statuses/mentions_timeline',
 			'statuses/user_timeline',
 			'statuses/home_timeline',
