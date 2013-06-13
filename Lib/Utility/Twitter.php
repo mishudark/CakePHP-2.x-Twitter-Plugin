@@ -186,7 +186,12 @@ class Twitter extends Object {
 /**
  * @param string $endPoint
  */
-	public function endPoint($endPoint, $apiVersion = '1', $ext = 'json') {
+	public function endPoint($endPoint, $apiVersion = false, $ext = 'json') {
+
+		if(!$apiVersion) {
+			$apiVersion = $this->_defaultApiVersion;
+		}
+
 		if (!in_array($endPoint, $this->_endPoints[$apiVersion])) {
 			throw new CakeException(__('Invalid Endpoint: %s', $endPoint));
 		}
