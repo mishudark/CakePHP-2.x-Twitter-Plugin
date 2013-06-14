@@ -731,7 +731,7 @@ class Twitter extends Object {
 				'status' => $status
 				), $options);
 
-			return json_decode($this->apiRequest('post', '/1/statuses/update.json', $body), true);
+			return json_decode($this->apiRequest('post', $this->endPoint('statuses/update'), $body), true);
 		}
 	}
 
@@ -745,7 +745,7 @@ class Twitter extends Object {
  */
 	public function destroyStatus($id) {
 		if (is_numeric($id)) {
-			return json_decode($this->apiRequest('post', '/1/statuses/destroy/' . $id . '.json', ''), true);
+			return json_decode($this->apiRequest('post', $this->endPoint('statuses/destroy', $this->_defaultApiVersion, '/' . $id . '.json'), ''), true);
 		}
 	}
 
@@ -759,7 +759,7 @@ class Twitter extends Object {
  */
 	public function retweetStatus($id) {
 		if ($id) {
-			return json_decode($this->apiRequest('post', '/1/statuses/retweet/' . $id . '.json', ''), true);
+			return json_decode($this->apiRequest('post', $this->endPoint('statuses/retweet', $this->_defaultApiVersion, '/' . $id . '.json'), ''), true);
 		}
 	}
 
