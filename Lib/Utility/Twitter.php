@@ -243,6 +243,7 @@ class Twitter extends Object {
 	public function connectApp($callbackUrl, $action='authorize') {
 		$request = array(
 			'uri' => array(
+				'scheme' => 'https',
 				'host' => 'api.twitter.com',
 				'path' => '/oauth/request_token',
 			),
@@ -256,7 +257,7 @@ class Twitter extends Object {
 		);
 		$response = $this->_Oauth->request($request);
 		parse_str($response, $response);
-		header("Location: http://api.twitter.com/oauth/$action?oauth_token={$response['oauth_token']}");
+		header("Location: https://api.twitter.com/oauth/$action?oauth_token={$response['oauth_token']}");
 		exit();
 	}
 
@@ -281,6 +282,7 @@ class Twitter extends Object {
 	public function authorizeTwitterUser($oauthToken, $oauthVerifier) {
 		$request = array(
 			'uri' => array(
+				'scheme' => 'https',
 				'host' => 'api.twitter.com',
 				'path' => '/oauth/access_token',
 				),
@@ -474,6 +476,7 @@ class Twitter extends Object {
 			$twitterMethodUrl = substr($twitterMethodUrl, 1, strlen($twitterMethodUrl));
 		}
 		$request['uri'] = array(
+			'scheme' => 'https',
 			'host' => 'api.twitter.com',
 			'path' => $twitterMethodUrl
 		);
