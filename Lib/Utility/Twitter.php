@@ -17,6 +17,7 @@
  */
 App::import('Vendor', 'Twitter.HttpSocketOauth');
 App::uses('CakeSession', 'Model/Datasource');
+App::uses('Multibyte', 'Utility');
 
 class Twitter extends Object {
 
@@ -486,9 +487,9 @@ class Twitter extends Object {
 		if (is_array($params)) {
 			$params = array_change_key_case($params);
 			if (array_key_exists('status', $params)) {
-				if (strlen($params['status']) > 140) $params['status'] = substr($params['status'], 0, 137) . '...';
+				if (mb_strlen($params['status']) > 140) $params['status'] = mb_substr($params['status'], 0, 137) . '...';
 			} else if (array_key_exists('text', $params)) {
-				if (strlen($params['text']) > 140) $params['text'] = substr($params['text'], 0, 137) . '...';
+				if (mb_strlen($params['text']) > 140) $params['text'] = mb_substr($params['text'], 0, 137) . '...';
 			}
 			if ($method == 'GET') {
 				$request['uri']['query'] = $params;
